@@ -6,8 +6,8 @@ jest.mock('sanity', () => ({
 
 import { schemaTypes } from './index'
 
-function fieldNames(schema: { fields?: { name: string }[] }) {
-  return (schema.fields ?? []).map((f) => f.name)
+function fieldNames(schema: any) {
+  return (schema.fields ?? []).map((f: any) => f.name)
 }
 
 describe('sanity schemas', () => {
