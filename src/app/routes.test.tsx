@@ -11,10 +11,14 @@ import CabinetPaintingPage from './services/cabinetpainting/page'
 import MinorRestorationPage from './services/minor-restoration/page'
 import WallpaperPage from './services/wallpaper/page'
 import ColorConsultPage from './services/colorconsult/page'
+import ReviewsPage from './reviews/page'
 
 jest.mock('@/lib/sanity/queries', () => ({
   getAllServices: jest.fn().mockResolvedValue([]),
-  getTestimonials: jest.fn().mockResolvedValue([]),
+  getTestimonials: jest.fn().mockResolvedValue([
+    { quote: 'Great work!', author: 'Jane D.', source: 'HomeAdvisor' },
+    { quote: 'Highly recommend.', author: 'Sam K.', source: 'Direct' },
+  ]),
   getServiceBySlug: jest.fn().mockResolvedValue(null),
   getPortfolioProjects: jest.fn().mockResolvedValue([]),
   getPortfolioProjectsByCategory: jest.fn().mockResolvedValue([]),
@@ -38,6 +42,7 @@ const pages: [string, () => ReactElement | Promise<ReactElement>, RegExp][] = [
   ['minor restoration', MinorRestorationPage, /restoration/i],
   ['wallpaper', WallpaperPage, /wallpaper/i],
   ['color consult', ColorConsultPage, /color consult/i],
+  ['reviews', ReviewsPage, /client reviews/i],
 ]
 
 describe('every site-map route', () => {

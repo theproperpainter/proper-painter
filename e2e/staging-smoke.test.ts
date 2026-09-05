@@ -21,6 +21,7 @@ describe('staging deployment', () => {
       '/services/minor-restoration',
       '/services/wallpaper',
       '/services/colorconsult',
+      '/reviews',
     ]
     for (const route of routes) {
       // `redirect: 'manual'` prevents fetch from silently following a redirect
