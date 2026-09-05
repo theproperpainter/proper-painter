@@ -16,6 +16,11 @@ function isNeutral(hex: string): boolean {
   return r === g && g === b
 }
 
+function countDeclarations(name: string): number {
+  const matches = css.match(new RegExp(`--color-${name}:`, 'g'))
+  return matches ? matches.length : 0
+}
+
 describe('grayscale theme tokens (globals.css @theme)', () => {
   it('defines a pure black background and white foreground', () => {
     expect(extractVar('background')).toBe('#000000')
@@ -29,5 +34,14 @@ describe('grayscale theme tokens (globals.css @theme)', () => {
       expect(hex).toMatch(/^#[0-9a-f]{6}$/i)
       expect(isNeutral(hex)).toBe(true)
     }
+  })
+
+  it('declares --color-background and --color-foreground exactly once each, so no later block (e.g. a shadcn "@theme inline") can shadow the brand tokens', () => {
+    // This guards against a regression where a second @theme block redefines
+    // --color-background/--color-foreground to point at the shadcn --background/
+    // --foreground variables (which resolve to white/near-black), silently
+    // overriding the pure black/white brand tokens defined above.
+    expect(countDeclarations('background')).toBe(1)
+    expect(countDeclarations('foreground')).toBe(1)
   })
 })
