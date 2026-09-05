@@ -23,7 +23,7 @@ export default async function Footer() {
           )}
 
           {settings?.socialLinks && settings.socialLinks.length > 0 && (
-            <ul className="flex gap-6">
+            <ul className="flex flex-wrap gap-x-6 gap-y-2">
               {settings.socialLinks.map((link) => (
                 <li key={link.platform}>
                   <a

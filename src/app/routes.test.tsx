@@ -45,7 +45,10 @@ jest.mock('@/lib/sanity/queries', () => ({
     role: 'Owner, M. Arch',
     bio: 'A woman-owned business built on craft and care.',
   }),
-  getSiteSettings: jest.fn().mockResolvedValue(null),
+  getSiteSettings: jest.fn().mockResolvedValue({
+    contactPhone: '412-427-6873',
+    contactEmail: 'theproperpainterllc@gmail.com',
+  }),
 }))
 
 const pages: [string, () => ReactElement | Promise<ReactElement>, RegExp][] = [
