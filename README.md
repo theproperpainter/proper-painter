@@ -46,16 +46,33 @@ account with access to the project).
 
 ## Deployment
 
-The site is deployed on Vercel. To find the current deployment URL, run `vercel ls` from
-the project directory (with the Vercel CLI linked) or check the Vercel dashboard.
+The site is deployed on Vercel, project `site-foundation` under the `proper-painter` team
+scope. Deployment Protection (Vercel Authentication) is disabled, so preview URLs are
+publicly viewable without a Vercel login.
+
+Current staging preview (updated 2026-09-04, reflects the merged `master` at the time):
+<https://site-foundation-robt2ammh-proper-painter.vercel.app>
+
+This URL changes on every `vercel` deploy — to find the current one, run `vercel ls` from
+the project directory (needs `vercel link` run once per local clone; see note below) or
+check the Vercel dashboard. To deploy a fresh preview after pulling new changes:
+
+```bash
+npx vercel --yes
+```
+
+**Note on `vercel link`:** the CLI's project link (`.vercel/project.json`) is local to
+whichever directory you run it from — it is not committed (`.vercel` is gitignored) and
+does not carry over between a git worktree and the main checkout. If `vercel` commands
+report they can't find a linked project, run `npx vercel link --yes --project site-foundation`
+first.
 
 ## Known follow-ups / handoff items
 
-- **Vercel project scope:** The linked Vercel project (`site-foundation`) lives under the
-  `proper-painter` team scope (business account, `theproperpainterllc@gmail.com`). There is
-  also an orphaned, empty, harmless duplicate project — also named `site-foundation` — under
-  a different, personal Vercel account from an earlier setup mixup. It's safe to delete
-  whenever convenient; it holds no traffic or config.
+- **Orphaned Vercel project:** There was an empty, harmless duplicate project — also named
+  `site-foundation` — under a different, personal Vercel account from an earlier setup
+  mixup. Delete it via that account's dashboard whenever convenient; it holds no traffic or
+  config.
 - **Preview environment env vars:** `NEXT_PUBLIC_SANITY_PROJECT_ID` and
   `NEXT_PUBLIC_SANITY_DATASET` are currently only configured for the Production environment
   in Vercel. Vercel requires a connected Git repository to scope environment variables to
