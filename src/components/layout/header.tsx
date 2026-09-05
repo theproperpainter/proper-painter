@@ -16,9 +16,9 @@ export default async function Header() {
   const settings = await getSiteSettings()
 
   return (
-    <header className="border-b border-gray-800 bg-background">
+    <header className="relative z-50 border-b border-gray-800 bg-background">
       <nav className="relative mx-auto flex max-w-6xl items-center justify-between px-6 py-5">
-        <Link href="/" className="flex items-center gap-3">
+        <Link href="/" className="relative z-50 flex items-center gap-3">
           {settings?.logo ? (
             <img
               src={urlForImage(settings.logo).width(96).height(96).url()}
@@ -42,8 +42,10 @@ export default async function Header() {
           ))}
         </ul>
 
+        {/* Mobile menu: a full-screen takeover rather than a thin dropdown
+            strip, so it feels like an intentional moment, not an afterthought. */}
         <details className="group md:hidden">
-          <summary className="flex h-10 w-10 list-none items-center justify-center text-foreground">
+          <summary className="relative z-50 flex h-10 w-10 list-none items-center justify-center text-foreground">
             <button type="button" aria-label="Menu" className="pointer-events-none">
               <svg
                 className="h-5 w-5 group-open:hidden"
@@ -67,12 +69,12 @@ export default async function Header() {
               </svg>
             </button>
           </summary>
-          <ul className="absolute top-full right-0 left-0 flex flex-col border-b border-gray-800 bg-background px-6">
+          <ul className="fixed inset-0 z-40 flex flex-col justify-center gap-1 bg-background px-8 pt-16">
             {NAV_LINKS.map((link) => (
               <li key={link.href} className="border-t border-gray-800 first:border-t-0">
                 <Link
                   href={link.href}
-                  className="block py-3 text-sm text-foreground transition-colors hover:text-gray-400"
+                  className="block py-4 font-serif text-3xl text-foreground transition-colors hover:text-gray-400"
                 >
                   {link.label}
                 </Link>
