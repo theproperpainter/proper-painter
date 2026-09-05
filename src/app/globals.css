@@ -20,8 +20,8 @@
   --color-gray-900: #171717;
   --color-gray-950: #0a0a0a;
 
-  --font-sans: var(--font-geist-sans);
-  --font-serif: ui-serif, Georgia, "Times New Roman", serif;
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-serif: var(--font-playfair), ui-serif, Georgia, serif;
   --font-mono: var(--font-geist-mono);
 }
 
@@ -149,5 +149,8 @@ body {
   }
   html {
     @apply font-sans;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-serif;
   }
 }

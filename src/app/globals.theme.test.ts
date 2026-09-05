@@ -44,4 +44,9 @@ describe('grayscale theme tokens (globals.css @theme)', () => {
     expect(countDeclarations('background')).toBe(1)
     expect(countDeclarations('foreground')).toBe(1)
   })
+
+  it('defines font-sans and font-serif referencing the loaded font variables', () => {
+    expect(css).toMatch(/--font-sans:\s*var\(--font-inter\)/)
+    expect(css).toMatch(/--font-serif:\s*var\(--font-playfair\)/)
+  })
 })
