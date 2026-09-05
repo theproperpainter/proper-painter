@@ -14,7 +14,10 @@ import ColorConsultPage from './services/colorconsult/page'
 import ReviewsPage from './reviews/page'
 
 jest.mock('@/lib/sanity/queries', () => ({
-  getAllServices: jest.fn().mockResolvedValue([]),
+  getAllServices: jest.fn().mockResolvedValue([
+    { title: 'Interior Painting', slug: { current: 'interior-painting' } },
+    { title: 'Cabinet Painting', slug: { current: 'cabinetpainting' } },
+  ]),
   getTestimonials: jest.fn().mockResolvedValue([
     { quote: 'Great work!', author: 'Jane D.', source: 'HomeAdvisor' },
     { quote: 'Highly recommend.', author: 'Sam K.', source: 'Direct' },

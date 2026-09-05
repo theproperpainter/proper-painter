@@ -1,3 +1,18 @@
-export default function ServicesPage() {
-  return <h1 className="px-6 py-24 text-4xl font-semibold">Services</h1>
+import { getAllServices } from '@/lib/sanity/queries'
+import ServiceCard from '@/components/service-card'
+import { Section } from '@/components/ui/section'
+
+export default async function ServicesPage() {
+  const services = await getAllServices()
+
+  return (
+    <Section>
+      <h1 className="text-4xl">Our Services</h1>
+      <div className="mt-10 grid gap-6 sm:grid-cols-2 md:gap-8 lg:grid-cols-3">
+        {services.map((service) => (
+          <ServiceCard key={service.slug.current} service={service} />
+        ))}
+      </div>
+    </Section>
+  )
 }
