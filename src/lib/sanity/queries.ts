@@ -58,7 +58,7 @@ export async function getPortfolioProjects(): Promise<PortfolioProject[]> {
 
 export async function getPortfolioProjectsByCategory(category: string): Promise<PortfolioProject[]> {
   return sanityFetch<PortfolioProject[]>(
-    `*[_type == "portfolioProject" && category == $category]{title, afterImage, description}`,
+    `*[_type == "portfolioProject" && category == $category]{title, category, afterImage, description}`,
     { category }
   )
 }
