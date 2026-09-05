@@ -7,7 +7,7 @@ describe('inferCategory', () => {
 
   it('maps bathroom/living-room/general room alt text to Interior Painting', () => {
     expect(inferCategory('Modern bathroom with dark walls, white toilet, and matching vanity with a mirror and towel rack.')).toBe('Interior Painting')
-    expect(inferCategory('Living room with patterned wallpaper, tufted leather sofa, and glass door to a patio view.')).toBe('Interior Painting')
+    expect(inferCategory('Living room with a tufted leather sofa and glass door to a patio view.')).toBe('Interior Painting')
   })
 
   it('maps wallpaper-specific alt text to Wallpaper & Faux Finishes', () => {

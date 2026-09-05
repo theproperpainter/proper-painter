@@ -1,6 +1,6 @@
 const CATEGORY_KEYWORDS: { category: string; keywords: string[] }[] = [
   { category: 'Cabinet Painting', keywords: ['cabinet', 'kitchen'] },
-  { category: 'Wallpaper & Faux Finishes', keywords: ['wallpaper wall', 'faux finishes', 'faux finish'] },
+  { category: 'Wallpaper & Faux Finishes', keywords: ['wallpaper'] },
   { category: 'Restoration', keywords: ['staircase', 'restoration', 'antique', 'furniture'] },
   { category: 'Interior Painting', keywords: [] }, // fallback, checked last
 ]
