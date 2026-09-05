@@ -21,7 +21,7 @@ module.exports = {
   },
   extensionsToTreatAsEsm: ['.ts'],
   transformIgnorePatterns: [
-    'node_modules/(?!(sanity|next-sanity|@sanity)/)',
+    'node_modules/(?!(sanity|next-sanity|@sanity|@portabletext|nanoid)/)',
   ],
   testMatch: ['**/__tests__/**/*.ts?(x)', '**/?(*.)+(spec|test).ts?(x)'],
 }
