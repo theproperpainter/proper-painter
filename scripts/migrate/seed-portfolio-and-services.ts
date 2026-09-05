@@ -10,13 +10,25 @@ interface CrawledAsset {
   sourcePage: string
 }
 
-// The site's logo image (Task 6's `findAndUploadLogo` already uploaded this and set
-// it as `siteSettings.logo`). Its alt text is 23 characters, so it would otherwise
-// pass the `alt.length > 15` "real photography" filter below and get miscategorized
-// as a portfolio project (falling through `inferCategory` to "Interior Painting").
-// Exclude it explicitly so this script only ever creates portfolioProject documents
-// for actual project photos, not the company logo.
-const LOGO_ALT = 'The Proper Painter, LLC'
+// Alt text values that pass the `alt.length > 15` "real photography" filter below
+// but do NOT represent real project photos, so they must be excluded explicitly:
+//
+// - The site's logo image (Task 6's `findAndUploadLogo` already uploaded this and
+//   set it as `siteSettings.logo`). Its alt text is 23 characters, so it would
+//   otherwise get miscategorized as a portfolio project (falling through
+//   `inferCategory` to "Interior Painting").
+// - The services-grid UI tile/icon whose alt is exactly "Interior Painting" (17
+//   characters). It's a small UI graphic, not a real project photo, but because it
+//   also falls into the "Interior Painting" category via `inferCategory`'s
+//   fallback, and the crawl/processing order puts it before the real bathroom
+//   photo in that category, it previously became its own spurious portfolioProject
+//   document AND stole the `interior-painting` service's heroImage slot (see the
+//   `!existing.heroImage` guard in `upsertServiceHeroImage` — whichever asset in a
+//   category is processed first wins the hero image).
+//
+// Exclude both explicitly so this script only ever creates portfolioProject
+// documents for actual project photos.
+const EXCLUDED_ALTS = ['The Proper Painter, LLC', 'Interior Painting']
 
 const SERVICES: { category: string; slug: string; title: string }[] = [
   { category: 'Interior Painting', slug: 'interior-painting', title: 'Interior Painting' },
@@ -56,8 +68,11 @@ async function main() {
   const assets: CrawledAsset[] = JSON.parse(readFileSync(manifestPath, 'utf-8'))
 
   // Only migrate real photography (has meaningful alt text, not icons/logos).
-  // The logo is excluded explicitly — see LOGO_ALT comment above.
-  const photoAssets = assets.filter((a) => a.alt && a.alt.length > 15 && a.alt !== LOGO_ALT)
+  // The logo and the "Interior Painting" UI tile are excluded explicitly — see
+  // EXCLUDED_ALTS comment above.
+  const photoAssets = assets.filter(
+    (a) => a.alt && a.alt.length > 15 && !EXCLUDED_ALTS.includes(a.alt)
+  )
 
   // The crawl (Task 4) revisits the same photo across multiple page headers/footers
   // and page bodies, producing duplicate entries with identical urls. Dedupe by url

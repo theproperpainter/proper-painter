@@ -48,4 +48,24 @@ describe('uploadAsset', () => {
       asset: { _type: 'reference', _ref: 'image-xyz789-1920x1080-png' },
     })
   })
+
+  it('throws a descriptive error when the image download response is not ok', async () => {
+    ;(fetch as jest.Mock).mockResolvedValueOnce({
+      ok: false,
+      status: 404,
+      statusText: 'Not Found',
+      arrayBuffer: () => Promise.resolve(new ArrayBuffer(8)),
+    })
+
+    const mockClient = {
+      assets: {
+        upload: jest.fn(),
+      },
+    } as any
+
+    await expect(
+      uploadAsset(mockClient, { url: 'https://example.com/missing.jpg', alt: 'A missing photo' })
+    ).rejects.toThrow('Failed to download image from https://example.com/missing.jpg: 404 Not Found')
+    expect(mockClient.assets.upload).not.toHaveBeenCalled()
+  })
 })

@@ -25,6 +25,9 @@ export async function uploadAsset(
   asset: { url: string; alt: string }
 ): Promise<ImageFieldValue> {
   const response = await fetch(asset.url)
+  if (!response.ok) {
+    throw new Error(`Failed to download image from ${asset.url}: ${response.status} ${response.statusText}`)
+  }
   const arrayBuffer = await response.arrayBuffer()
   const buffer = Buffer.from(arrayBuffer)
   const filename = extractFilename(asset.url)
