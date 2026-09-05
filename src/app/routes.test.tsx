@@ -1,4 +1,5 @@
 import { render, screen } from '@testing-library/react'
+import type { ReactElement } from 'react'
 import HomePage from './page'
 import AboutPage from './about/page'
 import PortfolioPage from './portfolio/page'
@@ -11,7 +12,7 @@ import MinorRestorationPage from './services/minor-restoration/page'
 import WallpaperPage from './services/wallpaper/page'
 import ColorConsultPage from './services/colorconsult/page'
 
-const pages: [string, () => JSX.Element, RegExp][] = [
+const pages: [string, () => ReactElement, RegExp][] = [
   ['home', HomePage, /proper painter/i],
   ['about', AboutPage, /about/i],
   ['portfolio', PortfolioPage, /portfolio/i],
