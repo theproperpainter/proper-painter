@@ -16,5 +16,6 @@ export const siteSettings = defineType({
         { name: 'url', type: 'url' },
       ] }],
     }),
+    defineField({ name: 'logo', title: 'Logo', type: 'image', options: { hotspot: true } }),
   ],
 })

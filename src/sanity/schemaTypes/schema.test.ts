@@ -42,10 +42,10 @@ describe('sanity schemas', () => {
     expect(fieldNames(member)).toEqual(expect.arrayContaining(['name', 'role', 'bio', 'photo']))
   })
 
-  it('siteSettings has contactEmail, contactPhone, socialLinks', () => {
+  it('siteSettings has contactEmail, contactPhone, socialLinks, logo', () => {
     const settings = schemaTypes.find((s) => s.name === 'siteSettings')!
     expect(fieldNames(settings)).toEqual(
-      expect.arrayContaining(['contactEmail', 'contactPhone', 'socialLinks'])
+      expect.arrayContaining(['contactEmail', 'contactPhone', 'socialLinks', 'logo'])
     )
   })
 })
