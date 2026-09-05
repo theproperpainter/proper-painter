@@ -11,7 +11,7 @@ export default async function ContactPage() {
 
   return (
     <Section>
-      <h1 className="text-5xl font-light tracking-tight">Contact Us</h1>
+      <h1 className="text-4xl font-light tracking-tight md:text-5xl">Contact Us</h1>
       <p className="mt-4 max-w-md leading-relaxed text-gray-400">
         Tell us about your rooms and your timeline. We reply personally, usually within a
         business day.
@@ -56,7 +56,7 @@ export default async function ContactPage() {
             <textarea id="message" name="message" rows={4} className={`${fieldClass} resize-none`} />
           </div>
           <button
-            type="submit"
+            type="button"
             className="mt-2 inline-block w-full border border-foreground px-8 py-3 text-sm tracking-wide transition-colors hover:bg-foreground hover:text-background sm:w-auto"
           >
             Send message

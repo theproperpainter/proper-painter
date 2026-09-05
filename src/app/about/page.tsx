@@ -3,7 +3,7 @@ import { Section } from '@/components/ui/section'
 export default function AboutPage() {
   return (
     <Section>
-      <h1 className="text-5xl font-semibold tracking-tight">About The Proper Painter</h1>
+      <h1 className="text-4xl font-light tracking-tight md:text-5xl">About The Proper Painter</h1>
       <div className="mt-8 max-w-2xl space-y-6">
         <p className="text-base leading-relaxed text-gray-300">
           The Proper Painter is a women-owned and operated interior painting company,

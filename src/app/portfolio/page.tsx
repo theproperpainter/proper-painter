@@ -8,10 +8,10 @@ export default async function PortfolioPage() {
   return (
     <Section>
       <div className="mb-12">
-        <h1 className="text-4xl">Portfolio</h1>
-        <p className="mt-4 text-lg text-gray-600">Our finest interiors, thoughtfully executed.</p>
+        <h1 className="text-4xl font-light tracking-tight md:text-5xl">Portfolio</h1>
+        <p className="mt-4 text-lg text-gray-400">Our finest interiors, thoughtfully executed.</p>
       </div>
-      <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-2">
+      <div className="grid gap-8 sm:grid-cols-2">
         {projects.map((p, i) => (
           <PortfolioCard key={i} project={p} />
         ))}
