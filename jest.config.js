@@ -20,8 +20,6 @@ module.exports = {
     ],
   },
   extensionsToTreatAsEsm: ['.ts'],
-  transformIgnorePatterns: [
-    'node_modules/(?!(sanity|next-sanity|@sanity|@portabletext|nanoid)/)',
-  ],
+  transformIgnorePatterns: [],
   testMatch: ['**/__tests__/**/*.ts?(x)', '**/?(*.)+(spec|test).ts?(x)'],
 }
