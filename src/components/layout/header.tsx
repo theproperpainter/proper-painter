@@ -29,7 +29,7 @@ export default async function Header() {
           <span className="font-serif text-xl text-foreground">The Proper Painter</span>
         </Link>
 
-        <ul hidden className="gap-8 md:flex">
+        <ul className="hidden gap-8 md:flex">
           {NAV_LINKS.map((link) => (
             <li key={link.href}>
               <Link

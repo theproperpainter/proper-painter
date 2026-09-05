@@ -26,7 +26,14 @@ describe('Header', () => {
       [/^contact$/i, '/contact'],
     ]
     for (const [name, href] of expected) {
-      expect(screen.getByRole('link', { name })).toHaveAttribute('href', href)
+      // The header renders both a desktop nav and a mobile menu copy of each
+      // link (toggled via CSS, not conditional rendering), so every match
+      // must point to the right href.
+      const links = screen.getAllByRole('link', { name })
+      expect(links.length).toBeGreaterThan(0)
+      for (const link of links) {
+        expect(link).toHaveAttribute('href', href)
+      }
     }
   })
 
