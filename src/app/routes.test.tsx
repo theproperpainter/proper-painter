@@ -22,7 +22,19 @@ jest.mock('@/lib/sanity/queries', () => ({
     { quote: 'Great work!', author: 'Jane D.', source: 'HomeAdvisor' },
     { quote: 'Highly recommend.', author: 'Sam K.', source: 'Direct' },
   ]),
-  getServiceBySlug: jest.fn().mockResolvedValue(null),
+  getServiceBySlug: jest.fn((slug: string) =>
+    Promise.resolve({
+      title: {
+        'interior-painting': 'Interior Painting',
+        'cabinetpainting': 'Cabinet Painting',
+        'minor-restoration': 'Restoration',
+        'wallpaper': 'Wallpaper & Faux Finishes',
+        'colorconsult': 'Color Consultation',
+      }[slug] ?? 'Interior Painting',
+      slug: { current: slug },
+      summary: 'A fresh coat for any room.',
+    })
+  ),
   getPortfolioProjects: jest.fn().mockResolvedValue([]),
   getPortfolioProjectsByCategory: jest.fn().mockResolvedValue([]),
   getTeamMember: jest.fn().mockResolvedValue({

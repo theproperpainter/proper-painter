@@ -1,3 +1,27 @@
-export default function ColorConsultPage() {
-  return <h1 className="px-6 py-24 text-4xl font-semibold">Color Consultation</h1>
+import { getServiceBySlug } from '@/lib/sanity/queries'
+import { urlForImage } from '@/lib/sanity/image'
+import { Section } from '@/components/ui/section'
+
+const SLUG = 'colorconsult'
+
+export default async function ColorConsultPage() {
+  const service = await getServiceBySlug(SLUG)
+
+  return (
+    <Section>
+      {service?.heroImage && (
+        <img
+          src={urlForImage(service.heroImage).width(1200).height(600).url()}
+          alt={service.title}
+          className="mb-10 h-72 w-full border-b border-gray-800 object-cover grayscale md:h-[28rem]"
+        />
+      )}
+      <h1 className="text-4xl font-light tracking-tight md:text-5xl">
+        {service?.title ?? 'Color Consultation'}
+      </h1>
+      {service?.summary && (
+        <p className="mt-5 max-w-2xl text-lg leading-relaxed text-gray-400">{service.summary}</p>
+      )}
+    </Section>
+  )
 }
