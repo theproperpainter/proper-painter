@@ -2,6 +2,8 @@
 const defineConfigMock = jest.fn((config: any) => config)
 jest.mock('sanity', () => ({
   defineConfig: defineConfigMock,
+  defineField: (field: any) => field,
+  defineType: (type: any) => type,
 }))
 jest.mock('sanity/structure', () => ({
   structureTool: jest.fn(() => ({ type: 'structureTool' })),
