@@ -23,8 +23,16 @@ describe('staging deployment', () => {
       '/services/colorconsult',
     ]
     for (const route of routes) {
-      const res = await fetch(`${STAGING_URL}${route}`)
+      // `redirect: 'manual'` prevents fetch from silently following a redirect
+      // to Vercel's Deployment Protection login page (which itself returns a
+      // 200), so a redirected request is correctly reported as a redirect
+      // rather than masquerading as a successful response.
+      const res = await fetch(`${STAGING_URL}${route}`, { redirect: 'manual' })
       expect(res.status).toBe(200)
+
+      // Also verify the body is actually the site, not some other 200 page.
+      const body = await res.text()
+      expect(body).toContain('Proper Painter')
     }
   }, 30000)
 })
