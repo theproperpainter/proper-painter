@@ -24,7 +24,7 @@ jest.mock('@/lib/sanity/queries', () => ({
 
 const pages: [string, () => ReactElement | Promise<ReactElement>, RegExp][] = [
   ['home', HomePage, /proper painter/i],
-  ['about', AboutPage, /about/i],
+  ['about', AboutPage, /about the proper painter/i],
   ['portfolio', PortfolioPage, /portfolio/i],
   ['team', TeamPage, /team/i],
   ['contact', ContactPage, /contact/i],
