@@ -18,7 +18,11 @@ jest.mock('@/lib/sanity/queries', () => ({
   getServiceBySlug: jest.fn().mockResolvedValue(null),
   getPortfolioProjects: jest.fn().mockResolvedValue([]),
   getPortfolioProjectsByCategory: jest.fn().mockResolvedValue([]),
-  getTeamMember: jest.fn().mockResolvedValue(null),
+  getTeamMember: jest.fn().mockResolvedValue({
+    name: 'Elizabeth Best',
+    role: 'Owner, M. Arch',
+    bio: 'A woman-owned business built on craft and care.',
+  }),
   getSiteSettings: jest.fn().mockResolvedValue(null),
 }))
 
@@ -26,7 +30,7 @@ const pages: [string, () => ReactElement | Promise<ReactElement>, RegExp][] = [
   ['home', HomePage, /proper painter/i],
   ['about', AboutPage, /about the proper painter/i],
   ['portfolio', PortfolioPage, /portfolio/i],
-  ['team', TeamPage, /team/i],
+  ['team', TeamPage, /elizabeth best/i],
   ['contact', ContactPage, /contact/i],
   ['services index', ServicesPage, /services/i],
   ['interior painting', InteriorPaintingPage, /interior painting/i],
