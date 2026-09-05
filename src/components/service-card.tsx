@@ -12,7 +12,7 @@ export default function ServiceCard({ service }: { service: Service }) {
         <img
           src={urlForImage(service.heroImage).width(600).height(400).url()}
           alt={service.title}
-          className="h-48 w-full object-cover grayscale"
+          className="h-48 w-full object-cover"
         />
       ) : (
         <div className="flex h-48 w-full items-center justify-center bg-gray-900 text-gray-500">

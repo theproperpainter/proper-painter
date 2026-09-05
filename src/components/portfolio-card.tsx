@@ -8,7 +8,7 @@ export default function PortfolioCard({ project }: { project: PortfolioProject }
         <img
           src={urlForImage(project.afterImage).width(800).height(600).url()}
           alt={project.title}
-          className="h-64 w-full object-cover grayscale"
+          className="h-64 w-full object-cover"
         />
       )}
       <figcaption className="p-4 text-sm text-gray-400">{project.title}</figcaption>

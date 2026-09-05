@@ -18,7 +18,7 @@ export default async function WallpaperPage() {
         <img
           src={urlForImage(service.heroImage).width(1200).height(600).url()}
           alt={service.title}
-          className="mb-10 h-72 w-full border-b border-gray-800 object-cover grayscale md:h-[28rem]"
+          className="mb-10 h-72 w-full border-b border-gray-800 object-cover md:h-[28rem]"
         />
       )}
       <h1 className="text-4xl font-light tracking-tight md:text-5xl">

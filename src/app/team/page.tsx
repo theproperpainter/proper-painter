@@ -13,7 +13,7 @@ export default async function TeamPage() {
             <img
               src={urlForImage(member.photo).width(300).height(300).url()}
               alt={member.name}
-              className="mb-8 h-40 w-40 rounded-full object-cover grayscale"
+              className="mb-8 h-40 w-40 rounded-full object-cover"
             />
           )}
           <h1 className="text-4xl font-light tracking-tight md:text-5xl">{member.name}</h1>
