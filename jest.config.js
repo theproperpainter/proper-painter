@@ -21,5 +21,6 @@ module.exports = {
   },
   extensionsToTreatAsEsm: ['.ts'],
   transformIgnorePatterns: [],
+  testPathIgnorePatterns: ['/node_modules/', '/.worktrees/'],
   testMatch: ['**/__tests__/**/*.ts?(x)', '**/?(*.)+(spec|test).ts?(x)'],
 }
