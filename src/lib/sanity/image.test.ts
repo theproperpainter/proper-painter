@@ -1,18 +1,3 @@
-jest.mock('@sanity/image-url', () => {
-  return jest.fn(() => ({
-    image: jest.fn((source) => ({
-      url: jest.fn(() => {
-        const assetId = source?.asset?._ref?.split('-')[1]
-        return assetId ? `https://cdn.sanity.io/images/abc/def/${assetId}-800x600.jpg` : ''
-      }),
-    })),
-  }))
-})
-
-jest.mock('./client', () => ({
-  sanityClient: { projectId: 'test', dataset: 'test' },
-}))
-
 import { urlForImage } from './image'
 
 describe('urlForImage', () => {
