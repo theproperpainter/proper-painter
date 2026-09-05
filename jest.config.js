@@ -7,12 +7,13 @@ module.exports = {
     '^(\\.{1,2}/.*)\\.js$': '$1',
   },
   transform: {
-    '^.+\\.tsx?$': [
+    '^.+\\.(t|j)sx?$': [
       'ts-jest',
       {
         useESM: true,
         tsconfig: {
           module: 'esnext',
+          allowJs: true,
         },
       },
     ],

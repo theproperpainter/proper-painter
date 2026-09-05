@@ -1,3 +1,7 @@
+jest.mock('./client', () => ({
+  sanityClient: { projectId: 'nqr6djox', dataset: 'production' },
+}))
+
 import { urlForImage } from './image'
 
 describe('urlForImage', () => {
