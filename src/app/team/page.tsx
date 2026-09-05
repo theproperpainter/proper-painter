@@ -4,6 +4,7 @@ import { urlForImage } from '@/lib/sanity/image'
 export default async function TeamPage() {
   const [member, projects] = await Promise.all([getTeamMember(), getPortfolioProjects()])
   // Fall back to a project photo until a real headshot is added in Sanity.
+  const hasRealPhoto = Boolean(member?.photo)
   const image = member?.photo ?? projects[2]?.afterImage ?? projects[0]?.afterImage
 
   return (
@@ -29,7 +30,7 @@ export default async function TeamPage() {
         {image ? (
           <img
             src={urlForImage(image).width(1200).height(1400).url()}
-            alt={member?.name ?? ''}
+            alt={hasRealPhoto ? (member?.name ?? '') : ''}
             className="h-[50vh] w-full object-cover md:h-full md:min-h-[36rem]"
           />
         ) : (
