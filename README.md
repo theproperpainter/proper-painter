@@ -85,5 +85,10 @@ first.
   sidebar with working "create new" forms. This couldn't be verified by an automated agent
   since Sanity Studio requires interactive account login.
 - **Out of scope for this phase:** This "Site Foundation" plan intentionally does not
-  include real content or photos, page-specific visual design, DripJobs CRM integration, or
-  customer review data. See the design spec above for what's planned next.
+  include page-specific visual design, DripJobs CRM integration, or ongoing customer review
+  syncing. See the design spec above for what's planned next.
+- **Real content migrated:** Real testimonials, site settings, team member, portfolio
+  projects, and service content/photos have since been migrated into production Sanity by
+  the Content & Asset Migration work. See `scripts/migrate/README.md` for what ran, when,
+  and important caveats (non-idempotent scripts, known follow-ups) before touching that
+  data again.
