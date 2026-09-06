@@ -41,7 +41,7 @@ export default function MobileNav() {
               onClick={() => {
                 if (detailsRef.current) detailsRef.current.open = false
               }}
-              className="block py-4 font-serif text-3xl text-foreground transition-colors hover:text-gray-400"
+              className="block py-4 font-display text-3xl font-semibold tracking-tight text-foreground transition-colors hover:text-gray-400"
             >
               {link.label}
             </Link>
