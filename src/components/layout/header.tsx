@@ -21,9 +21,9 @@ export default async function Header() {
         <Link href="/" className="relative z-50 flex items-center gap-3">
           {settings?.logo ? (
             <img
-              src={urlForImage(settings.logo).width(160).height(160).url()}
+              src={urlForImage(settings.logo).width(320).height(320).url()}
               alt="The Proper Painter"
-              className="h-16 w-auto object-contain grayscale"
+              className="h-32 w-auto object-contain grayscale"
             />
           ) : null}
           <span className="font-serif text-xl text-foreground">The Proper Painter</span>

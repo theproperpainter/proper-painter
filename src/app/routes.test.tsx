@@ -40,6 +40,7 @@ jest.mock('@/lib/sanity/queries', () => ({
     { title: 'Elegant spiral staircase' },
   ]),
   getPortfolioProjectsByCategory: jest.fn().mockResolvedValue([]),
+  getPortfolioCategories: jest.fn().mockResolvedValue([]),
   getTeamMember: jest.fn().mockResolvedValue({
     name: 'Elizabeth Best',
     role: 'Owner, M. Arch',

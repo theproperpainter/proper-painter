@@ -1,9 +1,34 @@
-import { getPortfolioProjects } from '@/lib/sanity/queries'
+import Link from 'next/link'
+import { getPortfolioProjects, getPortfolioCategories } from '@/lib/sanity/queries'
 import { urlForImage } from '@/lib/sanity/image'
 import { Container } from '@/components/ui/section'
+import { slugify } from '@/lib/slugify'
+
+// Matches the order services appear elsewhere on the site. Any category not
+// listed here (e.g. one added later in Sanity) is appended after these, in
+// the order Sanity returns it.
+const CATEGORY_ORDER = [
+  'Interior Painting',
+  'Cabinet Painting',
+  'Restoration',
+  'Wallpaper & Faux Finishes',
+  'Color Consultation & Design',
+]
+
+function sortCategories(categories: string[]): string[] {
+  return [...categories].sort((a, b) => {
+    const ai = CATEGORY_ORDER.indexOf(a)
+    const bi = CATEGORY_ORDER.indexOf(b)
+    if (ai === -1 && bi === -1) return a.localeCompare(b)
+    if (ai === -1) return 1
+    if (bi === -1) return -1
+    return ai - bi
+  })
+}
 
 export default async function PortfolioPage() {
-  const projects = await getPortfolioProjects()
+  const [projects, categoriesRaw] = await Promise.all([getPortfolioProjects(), getPortfolioCategories()])
+  const categories = sortCategories(categoriesRaw)
 
   return (
     <>
@@ -15,31 +40,46 @@ export default async function PortfolioPage() {
           </p>
         </div>
       </Container>
-      <div>
-        {projects.map((project, i) => (
-          <div key={i} className="border-t border-gray-800">
-            {project.afterImage ? (
-              <img
-                src={urlForImage(project.afterImage).width(1600).height(1200).url()}
-                alt={project.title}
-                className="h-[55vh] w-full object-cover md:h-[80vh]"
-              />
-            ) : (
-              <div className="flex h-[55vh] w-full items-center justify-center bg-gray-900 text-gray-500 md:h-[80vh]">
-                {project.title}
+
+      {categories.map((category) => {
+        const categoryProjects = projects.filter((p) => p.category === category)
+        if (categoryProjects.length === 0) return null
+        const preview = categoryProjects.slice(0, 4)
+        const slug = slugify(category)
+
+        return (
+          <Container key={category}>
+            <div className="border-t border-gray-800 py-12 md:py-16">
+              <div className="flex items-baseline justify-between gap-6">
+                <h2 className="text-2xl md:text-3xl">{category}</h2>
+                <Link
+                  href={`/portfolio/${slug}`}
+                  className="shrink-0 text-sm underline underline-offset-4 hover:text-gray-400"
+                >
+                  See all {categoryProjects.length}
+                </Link>
               </div>
-            )}
-            <Container>
-              <div className="max-w-xl py-8 md:py-10">
-                <h2 className="text-2xl md:text-3xl">{project.title}</h2>
-                {project.description && (
-                  <p className="mt-3 leading-relaxed text-gray-400">{project.description}</p>
-                )}
+              <div className="mt-6 grid grid-cols-2 gap-3 md:grid-cols-4 md:gap-5">
+                {preview.map((project, i) => (
+                  <Link key={i} href={`/portfolio/${slug}`} className="block border border-gray-800">
+                    {project.afterImage ? (
+                      <img
+                        src={urlForImage(project.afterImage).width(500).height(500).url()}
+                        alt={project.title}
+                        className="aspect-square w-full object-cover transition-opacity hover:opacity-90"
+                      />
+                    ) : (
+                      <div className="flex aspect-square w-full items-center justify-center bg-gray-900 text-xs text-gray-500">
+                        {project.title}
+                      </div>
+                    )}
+                  </Link>
+                ))}
               </div>
-            </Container>
-          </div>
-        ))}
-      </div>
+            </div>
+          </Container>
+        )
+      })}
     </>
   )
 }

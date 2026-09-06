@@ -63,6 +63,12 @@ export async function getPortfolioProjectsByCategory(category: string): Promise<
   )
 }
 
+export async function getPortfolioCategories(): Promise<string[]> {
+  return sanityFetch<string[]>(
+    `array::unique(*[_type == "portfolioProject" && defined(category)].category)`
+  )
+}
+
 export async function getTestimonials(): Promise<Testimonial[]> {
   return sanityFetch<Testimonial[]>(`*[_type == "testimonial"]{quote, author, source}`)
 }
