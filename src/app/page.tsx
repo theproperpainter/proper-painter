@@ -14,7 +14,11 @@ export default async function HomePage() {
     getPortfolioProjects(),
   ])
 
-  const heroImage = projects[0]?.afterImage ?? services[0]?.heroImage
+  // Pinned to the spiral staircase photo per Elizabeth's request, rather than
+  // whatever "first" portfolio project Sanity happens to return.
+  const STAIRCASE_PROJECT_ID = 'U312e1WEeOlY6t2zsmXpaO'
+  const staircaseProject = projects.find((p) => p._id === STAIRCASE_PROJECT_ID)
+  const heroImage = staircaseProject?.afterImage ?? projects[0]?.afterImage ?? services[0]?.heroImage
   // Prefer a second, distinct project photo so the closing bookend never
   // repeats the image the visitor just saw in the last row of "The Work".
   const closingImage = projects[1]?.afterImage ?? projects[0]?.afterImage ?? services[0]?.heroImage

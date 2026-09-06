@@ -13,6 +13,7 @@ export interface Service {
 }
 
 export interface PortfolioProject {
+  _id: string
   title: string
   category?: string
   afterImage?: SanityImage
@@ -52,13 +53,13 @@ export async function getServiceBySlug(slug: string): Promise<Service | null> {
 
 export async function getPortfolioProjects(): Promise<PortfolioProject[]> {
   return sanityFetch<PortfolioProject[]>(
-    `*[_type == "portfolioProject"]{title, category, afterImage, description}`
+    `*[_type == "portfolioProject"]{_id, title, category, afterImage, description}`
   )
 }
 
 export async function getPortfolioProjectsByCategory(category: string): Promise<PortfolioProject[]> {
   return sanityFetch<PortfolioProject[]>(
-    `*[_type == "portfolioProject" && category == $category]{title, category, afterImage, description}`,
+    `*[_type == "portfolioProject" && category == $category]{_id, title, category, afterImage, description}`,
     { category }
   )
 }
