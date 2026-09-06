@@ -1,13 +1,23 @@
 import { NextResponse } from 'next/server'
 
 interface ContactPayload {
-  name?: unknown
+  firstName?: unknown
+  lastName?: unknown
   email?: unknown
+  phone?: unknown
+  jobAddress?: unknown
+  jobCity?: unknown
+  jobState?: unknown
+  jobZip?: unknown
   message?: unknown
 }
 
 function isValidEmail(email: string): boolean {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
+}
+
+function str(value: unknown): string {
+  return typeof value === 'string' ? value.trim() : ''
 }
 
 export async function POST(request: Request) {
@@ -18,12 +28,24 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Invalid request body.' }, { status: 400 })
   }
 
-  const name = typeof body.name === 'string' ? body.name.trim() : ''
-  const email = typeof body.email === 'string' ? body.email.trim() : ''
-  const message = typeof body.message === 'string' ? body.message.trim() : ''
+  const firstName = str(body.firstName)
+  const lastName = str(body.lastName)
+  const email = str(body.email)
+  const phone = str(body.phone)
+  const message = str(body.message)
+  // The job site's address is a nice-to-have, not a hard requirement — most
+  // people requesting a quote will type it in, but we don't want to block
+  // an otherwise-valid submission on it.
+  const jobAddress = str(body.jobAddress)
+  const jobCity = str(body.jobCity)
+  const jobState = str(body.jobState)
+  const jobZip = str(body.jobZip)
 
-  if (!name || !email || !message) {
-    return NextResponse.json({ error: 'Name, email, and message are all required.' }, { status: 400 })
+  if (!firstName || !lastName || !email || !phone || !message) {
+    return NextResponse.json(
+      { error: 'First name, last name, email, phone, and message are all required.' },
+      { status: 400 }
+    )
   }
   if (!isValidEmail(email)) {
     return NextResponse.json({ error: 'Please enter a valid email address.' }, { status: 400 })
@@ -42,7 +64,18 @@ export async function POST(request: Request) {
     const zapierResponse = await fetch(webhookUrl, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name, email, message, source: 'theproperpainter.com contact form' }),
+      body: JSON.stringify({
+        firstName,
+        lastName,
+        email,
+        phone,
+        jobAddress,
+        jobCity,
+        jobState,
+        jobZip,
+        message,
+        source: 'theproperpainter.com contact form',
+      }),
     })
     if (!zapierResponse.ok) {
       throw new Error(`Zapier webhook responded with ${zapierResponse.status}`)

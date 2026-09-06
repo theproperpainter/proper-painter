@@ -21,8 +21,14 @@ export default function ContactForm() {
     const form = event.currentTarget
     const data = new FormData(form)
     const payload = {
-      name: data.get('name'),
+      firstName: data.get('firstName'),
+      lastName: data.get('lastName'),
       email: data.get('email'),
+      phone: data.get('phone'),
+      jobAddress: data.get('jobAddress'),
+      jobCity: data.get('jobCity'),
+      jobState: data.get('jobState'),
+      jobZip: data.get('jobZip'),
       message: data.get('message'),
     }
 
@@ -58,17 +64,90 @@ export default function ContactForm() {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6 md:border-l md:border-gray-800 md:pl-16">
-      <div>
-        <label htmlFor="name" className={labelClass}>
-          Name
-        </label>
-        <input id="name" name="name" type="text" autoComplete="name" required className={fieldClass} />
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <label htmlFor="firstName" className={labelClass}>
+            First name
+          </label>
+          <input
+            id="firstName"
+            name="firstName"
+            type="text"
+            autoComplete="given-name"
+            required
+            className={fieldClass}
+          />
+        </div>
+        <div>
+          <label htmlFor="lastName" className={labelClass}>
+            Last name
+          </label>
+          <input
+            id="lastName"
+            name="lastName"
+            type="text"
+            autoComplete="family-name"
+            required
+            className={fieldClass}
+          />
+        </div>
       </div>
       <div>
         <label htmlFor="email" className={labelClass}>
           Email
         </label>
         <input id="email" name="email" type="email" autoComplete="email" required className={fieldClass} />
+      </div>
+      <div>
+        <label htmlFor="phone" className={labelClass}>
+          Phone
+        </label>
+        <input id="phone" name="phone" type="tel" autoComplete="tel" required className={fieldClass} />
+      </div>
+      <div>
+        <label htmlFor="jobAddress" className={labelClass}>
+          Job address <span className="text-gray-600">(optional)</span>
+        </label>
+        <input
+          id="jobAddress"
+          name="jobAddress"
+          type="text"
+          autoComplete="street-address"
+          className={fieldClass}
+        />
+      </div>
+      <div className="grid grid-cols-3 gap-4">
+        <div>
+          <label htmlFor="jobCity" className={labelClass}>
+            City
+          </label>
+          <input id="jobCity" name="jobCity" type="text" autoComplete="address-level2" className={fieldClass} />
+        </div>
+        <div>
+          <label htmlFor="jobState" className={labelClass}>
+            State
+          </label>
+          <input
+            id="jobState"
+            name="jobState"
+            type="text"
+            autoComplete="address-level1"
+            className={fieldClass}
+          />
+        </div>
+        <div>
+          <label htmlFor="jobZip" className={labelClass}>
+            Zip
+          </label>
+          <input
+            id="jobZip"
+            name="jobZip"
+            type="text"
+            inputMode="numeric"
+            autoComplete="postal-code"
+            className={fieldClass}
+          />
+        </div>
       </div>
       <div>
         <label htmlFor="message" className={labelClass}>

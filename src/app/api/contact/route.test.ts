@@ -4,6 +4,18 @@
 const originalEnv = process.env.ZAPIER_WEBHOOK_URL
 const originalFetch = global.fetch
 
+const validSubmission = {
+  firstName: 'Jane',
+  lastName: 'Doe',
+  email: 'jane@example.com',
+  phone: '412-555-0100',
+  jobAddress: '123 Main St',
+  jobCity: 'Pittsburgh',
+  jobState: 'PA',
+  jobZip: '15201',
+  message: 'Please quote my kitchen.',
+}
+
 function makeRequest(body: unknown): Request {
   return new Request('http://localhost/api/contact', {
     method: 'POST',
@@ -28,9 +40,7 @@ describe('POST /api/contact', () => {
     global.fetch = fetchMock as unknown as typeof fetch
 
     const { POST } = await import('./route')
-    const response = await POST(
-      makeRequest({ name: 'Jane Doe', email: 'jane@example.com', message: 'Please quote my kitchen.' })
-    )
+    const response = await POST(makeRequest(validSubmission))
     const body = await response.json()
 
     expect(response.status).toBe(200)
@@ -40,8 +50,14 @@ describe('POST /api/contact', () => {
       expect.objectContaining({
         method: 'POST',
         body: JSON.stringify({
-          name: 'Jane Doe',
+          firstName: 'Jane',
+          lastName: 'Doe',
           email: 'jane@example.com',
+          phone: '412-555-0100',
+          jobAddress: '123 Main St',
+          jobCity: 'Pittsburgh',
+          jobState: 'PA',
+          jobZip: '15201',
           message: 'Please quote my kitchen.',
           source: 'theproperpainter.com contact form',
         }),
@@ -49,22 +65,41 @@ describe('POST /api/contact', () => {
     )
   })
 
-  it('rejects a submission missing required fields', async () => {
-    const fetchMock = jest.fn()
+  it('accepts a submission with the job address fields left blank', async () => {
+    const fetchMock = jest.fn().mockResolvedValue({ ok: true, status: 200 })
     global.fetch = fetchMock as unknown as typeof fetch
 
     const { POST } = await import('./route')
-    const response = await POST(makeRequest({ name: 'Jane Doe', email: '', message: '' }))
+    const response = await POST(
+      makeRequest({
+        firstName: 'Jane',
+        lastName: 'Doe',
+        email: 'jane@example.com',
+        phone: '412-555-0100',
+        message: 'Please quote my kitchen.',
+      })
+    )
 
-    expect(response.status).toBe(400)
-    expect(fetchMock).not.toHaveBeenCalled()
+    expect(response.status).toBe(200)
   })
+
+  it.each(['firstName', 'lastName', 'email', 'phone', 'message'])(
+    'rejects a submission missing the required field "%s"',
+    async (field) => {
+      const fetchMock = jest.fn()
+      global.fetch = fetchMock as unknown as typeof fetch
+
+      const { POST } = await import('./route')
+      const response = await POST(makeRequest({ ...validSubmission, [field]: '' }))
+
+      expect(response.status).toBe(400)
+      expect(fetchMock).not.toHaveBeenCalled()
+    }
+  )
 
   it('rejects a submission with an invalid email', async () => {
     const { POST } = await import('./route')
-    const response = await POST(
-      makeRequest({ name: 'Jane Doe', email: 'not-an-email', message: 'Hello there.' })
-    )
+    const response = await POST(makeRequest({ ...validSubmission, email: 'not-an-email' }))
 
     expect(response.status).toBe(400)
   })
@@ -73,9 +108,7 @@ describe('POST /api/contact', () => {
     delete process.env.ZAPIER_WEBHOOK_URL
 
     const { POST } = await import('./route')
-    const response = await POST(
-      makeRequest({ name: 'Jane Doe', email: 'jane@example.com', message: 'Hello there.' })
-    )
+    const response = await POST(makeRequest(validSubmission))
     const body = await response.json()
 
     expect(response.status).toBe(500)
@@ -86,9 +119,7 @@ describe('POST /api/contact', () => {
     global.fetch = jest.fn().mockResolvedValue({ ok: false, status: 500 }) as unknown as typeof fetch
 
     const { POST } = await import('./route')
-    const response = await POST(
-      makeRequest({ name: 'Jane Doe', email: 'jane@example.com', message: 'Hello there.' })
-    )
+    const response = await POST(makeRequest(validSubmission))
 
     expect(response.status).toBe(502)
   })
