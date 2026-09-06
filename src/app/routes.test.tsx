@@ -64,7 +64,7 @@ const pages: [string, () => ReactElement | Promise<ReactElement>, RegExp][] = [
   ['minor restoration', MinorRestorationPage, /restoration/i],
   ['wallpaper', WallpaperPage, /wallpaper/i],
   ['color consult', ColorConsultPage, /color consult/i],
-  ['reviews', ReviewsPage, /client reviews/i],
+  ['reviews', ReviewsPage, /testimonials/i],
 ]
 
 describe('every site-map route', () => {

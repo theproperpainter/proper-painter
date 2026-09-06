@@ -22,7 +22,7 @@ describe('Header', () => {
       [/^services$/i, '/services'],
       [/^portfolio$/i, '/portfolio'],
       [/^team$/i, '/team'],
-      [/^reviews$/i, '/reviews'],
+      [/^testimonials$/i, '/reviews'],
       [/^contact$/i, '/contact'],
     ]
     for (const [name, href] of expected) {

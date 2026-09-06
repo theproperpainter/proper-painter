@@ -7,8 +7,8 @@ export default async function ReviewsPage() {
   return (
     <Container>
       <div className="pt-16 pb-10 md:pt-24 md:pb-14">
-        <h1 className="text-4xl font-light tracking-tight md:text-5xl">Client Reviews</h1>
-        <p className="mt-2 text-gray-400">{testimonials.length} reviews from real clients.</p>
+        <h1 className="text-4xl font-light tracking-tight md:text-5xl">Testimonials</h1>
+        <p className="mt-2 text-gray-400">{testimonials.length} testimonials from real clients.</p>
       </div>
       <div className="pb-16 md:pb-24">
         {testimonials.map((t, i) => (
