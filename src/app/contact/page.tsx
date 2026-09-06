@@ -1,10 +1,6 @@
 import { getSiteSettings } from '@/lib/sanity/queries'
 import { Section } from '@/components/ui/section'
-
-const fieldClass =
-  'mt-1 w-full border-b border-gray-800 bg-transparent py-2 text-foreground placeholder:text-gray-600 focus:border-foreground focus:outline-none transition-colors'
-
-const labelClass = 'block text-sm text-gray-500'
+import ContactForm from '@/components/contact-form'
 
 export default async function ContactPage() {
   const settings = await getSiteSettings()
@@ -36,32 +32,7 @@ export default async function ContactPage() {
           </dl>
         </div>
 
-        <form className="space-y-6 md:border-l md:border-gray-800 md:pl-16">
-          <div>
-            <label htmlFor="name" className={labelClass}>
-              Name
-            </label>
-            <input id="name" name="name" type="text" autoComplete="name" className={fieldClass} />
-          </div>
-          <div>
-            <label htmlFor="email" className={labelClass}>
-              Email
-            </label>
-            <input id="email" name="email" type="email" autoComplete="email" className={fieldClass} />
-          </div>
-          <div>
-            <label htmlFor="message" className={labelClass}>
-              Message
-            </label>
-            <textarea id="message" name="message" rows={4} className={`${fieldClass} resize-none`} />
-          </div>
-          <button
-            type="button"
-            className="mt-2 inline-block w-full border border-foreground px-8 py-3 text-sm tracking-wide transition-colors hover:bg-foreground hover:text-background sm:w-auto"
-          >
-            Send message
-          </button>
-        </form>
+        <ContactForm />
       </div>
     </Section>
   )
