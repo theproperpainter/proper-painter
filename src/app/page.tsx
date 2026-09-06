@@ -49,7 +49,7 @@ export default async function HomePage() {
             Every room, painted properly — by a woman-owned crew that treats your home like
             their own.
           </p>
-          <Link href="/contact" className={`${ctaClass} self-start`}>
+          <Link href="/contact" className={`${ctaClass} self-start text-red-500`}>
             Get a Quote
           </Link>
         </div>
