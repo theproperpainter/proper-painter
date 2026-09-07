@@ -81,7 +81,17 @@ export default async function PortfolioCategoryPage({
               {project.afterImage ? (
                 <div className="relative h-[55vh] w-full md:h-[80vh]">
                   <Image
-                    src={urlForImage(project.afterImage).width(1600).height(1200).url()}
+                    src={(() => {
+                      // Some source photos are far smaller than the standard
+                      // 1080px+ originals (e.g. old phone photos). Forcing
+                      // Sanity to upscale those to the usual 1600x1200 crop
+                      // produces visible blur/pixelation in this large banner —
+                      // cap the request at the source's native width instead so
+                      // we never ask for more detail than the photo actually has.
+                      const width = Math.min(1600, project.afterImageWidth ?? 1600)
+                      const height = Math.round(width * 0.75)
+                      return urlForImage(project.afterImage!).width(width).height(height).url()
+                    })()}
                     alt={project.title}
                     fill
                     sizes="100vw"

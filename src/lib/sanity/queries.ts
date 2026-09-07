@@ -19,6 +19,7 @@ export interface PortfolioProject {
   beforeImage?: SanityImage
   afterImage?: SanityImage
   description?: string
+  afterImageWidth?: number
 }
 
 export interface Testimonial {
@@ -61,7 +62,7 @@ export async function getPortfolioProjects(): Promise<PortfolioProject[]> {
 
 export async function getPortfolioProjectsByCategory(category: string): Promise<PortfolioProject[]> {
   return sanityFetch<PortfolioProject[]>(
-    `*[_type == "portfolioProject" && category == $category] | order(coalesce(order, 9999) asc) {_id, title, category, beforeImage, afterImage, description}`,
+    `*[_type == "portfolioProject" && category == $category] | order(coalesce(order, 9999) asc) {_id, title, category, beforeImage, afterImage, description, "afterImageWidth": afterImage.asset->metadata.dimensions.width}`,
     { category }
   )
 }
