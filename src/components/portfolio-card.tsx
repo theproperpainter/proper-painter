@@ -11,7 +11,6 @@ export default function PortfolioCard({ project }: { project: PortfolioProject }
           className="h-64 w-full object-cover"
         />
       )}
-      <figcaption className="p-4 text-sm text-gray-400">{project.title}</figcaption>
     </figure>
   )
 }
