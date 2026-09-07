@@ -1,3 +1,4 @@
+import Image from 'next/image'
 import Link from 'next/link'
 import { getAllServices, getTestimonials, getPortfolioProjects } from '@/lib/sanity/queries'
 import { urlForImage } from '@/lib/sanity/image'
@@ -28,15 +29,18 @@ export default async function HomePage() {
       {/* Hero: photo and headline live side by side on desktop — both visible
           together, nothing to scroll past to reach the call to action. */}
       <div className="flex flex-col border-y border-gray-800 md:h-[85vh] md:flex-row">
-        <div className="md:w-1/2">
+        <div className="relative h-[60vh] md:h-full md:w-1/2">
           {heroImage ? (
-            <img
+            <Image
               src={urlForImage(heroImage).width(1600).height(1600).url()}
               alt=""
-              className="h-[60vh] w-full object-cover md:h-full"
+              fill
+              priority
+              sizes="(min-width: 768px) 50vw, 100vw"
+              className="object-cover"
             />
           ) : (
-            <div className="flex h-[60vh] w-full items-center justify-center bg-gray-900 text-gray-500 md:h-full">
+            <div className="flex h-full w-full items-center justify-center bg-gray-900 text-gray-500">
               The Proper Painter
             </div>
           )}
@@ -106,15 +110,17 @@ export default async function HomePage() {
       )}
 
       {/* Closing: bookend the hero with a second full-bleed photo before the final call to action. */}
-      <div className="mt-8 border-y border-gray-800 md:mt-10">
+      <div className="relative mt-8 h-[45vh] border-y border-gray-800 md:mt-10 md:h-[60vh]">
         {closingImage ? (
-          <img
+          <Image
             src={urlForImage(closingImage).width(1920).height(1000).url()}
             alt=""
-            className="h-[45vh] w-full object-cover md:h-[60vh]"
+            fill
+            sizes="100vw"
+            className="object-cover"
           />
         ) : (
-          <div className="flex h-[45vh] w-full items-center justify-center bg-gray-900 text-gray-500 md:h-[60vh]" />
+          <div className="flex h-full w-full items-center justify-center bg-gray-900 text-gray-500" />
         )}
       </div>
       <Container>

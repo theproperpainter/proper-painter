@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import Image from 'next/image'
 import { getPortfolioProjects, getAllServices } from '@/lib/sanity/queries'
 import { urlForImage } from '@/lib/sanity/image'
 
@@ -47,9 +48,11 @@ export default async function AboutPage() {
               rel="noreferrer"
               className="flex h-16 w-28 items-center justify-center bg-white p-2 transition-opacity hover:opacity-80"
             >
-              <img
+              <Image
                 src="/affiliations/bamp.png"
                 alt="Builders Association of Metropolitan Pittsburgh (BAMP)"
+                width={112}
+                height={64}
                 className="max-h-full max-w-full object-contain"
               />
             </a>
@@ -59,9 +62,11 @@ export default async function AboutPage() {
               rel="noreferrer"
               className="flex h-16 w-28 items-center justify-center bg-white p-2 transition-opacity hover:opacity-80"
             >
-              <img
+              <Image
                 src="/affiliations/pwb.png"
                 alt="PA Professional Women in Building (PWB)"
+                width={112}
+                height={64}
                 className="max-h-full max-w-full object-contain"
               />
             </a>
@@ -80,15 +85,17 @@ export default async function AboutPage() {
           </div>
         </div>
       </div>
-      <div className="order-1 md:order-2 md:w-1/2 md:border-l md:border-gray-800">
+      <div className="relative order-1 h-[50vh] md:order-2 md:h-full md:min-h-[36rem] md:w-1/2 md:border-l md:border-gray-800">
         {image ? (
-          <img
+          <Image
             src={urlForImage(image).width(1200).height(1400).url()}
             alt=""
-            className="h-[50vh] w-full object-cover md:h-full md:min-h-[36rem]"
+            fill
+            sizes="(min-width: 768px) 50vw, 100vw"
+            className="object-cover"
           />
         ) : (
-          <div className="flex h-[50vh] w-full items-center justify-center bg-gray-900 text-gray-500 md:h-full md:min-h-[36rem]" />
+          <div className="flex h-full w-full items-center justify-center bg-gray-900 text-gray-500" />
         )}
       </div>
     </div>

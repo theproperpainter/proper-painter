@@ -1,3 +1,4 @@
+import Image from 'next/image'
 import Link from 'next/link'
 import { urlForImage } from '@/lib/sanity/image'
 import { Container } from '@/components/ui/section'
@@ -6,15 +7,17 @@ import type { Service } from '@/lib/sanity/queries'
 export default function ServiceRow({ service }: { service: Service }) {
   return (
     <div className="border-t border-gray-800">
-      <Link href={`/services/${service.slug.current}`} className="block">
+      <Link href={`/services/${service.slug.current}`} className="relative block h-[45vh] md:h-[70vh]">
         {service.heroImage ? (
-          <img
+          <Image
             src={urlForImage(service.heroImage).width(1600).height(900).url()}
             alt={service.title}
-            className="h-[45vh] w-full object-cover transition-opacity hover:opacity-90 md:h-[70vh]"
+            fill
+            sizes="100vw"
+            className="object-cover transition-opacity hover:opacity-90"
           />
         ) : (
-          <div className="flex h-[45vh] w-full items-center justify-center bg-gray-900 text-gray-500 md:h-[70vh]">
+          <div className="flex h-full w-full items-center justify-center bg-gray-900 text-gray-500">
             {service.title}
           </div>
         )}

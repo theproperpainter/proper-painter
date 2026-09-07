@@ -1,3 +1,4 @@
+import Image from 'next/image'
 import { urlForImage } from '@/lib/sanity/image'
 import type { PortfolioProject } from '@/lib/sanity/queries'
 
@@ -19,12 +20,14 @@ export default function PortfolioCard({ project, variant = 'photo' }: PortfolioC
     : urlForImage(project.afterImage!).width(800).height(600).url()
 
   return (
-    <figure className={`border border-gray-800 ${isSwatch ? 'bg-white' : ''}`}>
+    <figure className={`relative h-64 border border-gray-800 ${isSwatch ? 'bg-white' : ''}`}>
       {project.afterImage && (
-        <img
+        <Image
           src={imageUrl}
           alt={project.title}
-          className={`h-64 w-full ${isSwatch ? 'object-contain' : 'object-cover'}`}
+          fill
+          sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
+          className={isSwatch ? 'object-contain' : 'object-cover'}
         />
       )}
     </figure>

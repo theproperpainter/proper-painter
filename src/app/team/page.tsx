@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import Image from 'next/image'
 import { getTeamMember, getPortfolioProjects } from '@/lib/sanity/queries'
 import { urlForImage } from '@/lib/sanity/image'
 
@@ -34,15 +35,17 @@ export default async function TeamPage() {
           <h1 className="text-4xl font-light tracking-tight md:text-5xl">Our Team</h1>
         )}
       </div>
-      <div className="order-1 md:order-2 md:w-1/2 md:border-l md:border-gray-800">
+      <div className="relative order-1 h-[50vh] md:order-2 md:h-full md:min-h-[36rem] md:w-1/2 md:border-l md:border-gray-800">
         {image ? (
-          <img
+          <Image
             src={urlForImage(image).width(1200).height(1400).url()}
             alt={hasRealPhoto ? (member?.name ?? '') : ''}
-            className="h-[50vh] w-full object-cover md:h-full md:min-h-[36rem]"
+            fill
+            sizes="(min-width: 768px) 50vw, 100vw"
+            className="object-cover"
           />
         ) : (
-          <div className="flex h-[50vh] w-full items-center justify-center bg-gray-900 text-gray-500 md:h-full md:min-h-[36rem]" />
+          <div className="flex h-full w-full items-center justify-center bg-gray-900 text-gray-500" />
         )}
       </div>
     </div>

@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import Image from 'next/image'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { getPortfolioProjectsByCategory, getPortfolioCategories } from '@/lib/sanity/queries'
@@ -73,11 +74,15 @@ export default async function PortfolioCategoryPage({
           {projects.map((project, i) => (
             <div key={i} className="border-t border-gray-800">
               {project.afterImage ? (
-                <img
-                  src={urlForImage(project.afterImage).width(1600).height(1200).url()}
-                  alt={project.title}
-                  className="h-[55vh] w-full object-cover md:h-[80vh]"
-                />
+                <div className="relative h-[55vh] w-full md:h-[80vh]">
+                  <Image
+                    src={urlForImage(project.afterImage).width(1600).height(1200).url()}
+                    alt={project.title}
+                    fill
+                    sizes="100vw"
+                    className="object-cover"
+                  />
+                </div>
               ) : (
                 <div className="flex h-[55vh] w-full items-center justify-center bg-gray-900 text-gray-500 md:h-[80vh]">
                   {project.title}

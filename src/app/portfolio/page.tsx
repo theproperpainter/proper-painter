@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import Image from 'next/image'
 import Link from 'next/link'
 import { getPortfolioProjects, getPortfolioCategories } from '@/lib/sanity/queries'
 import { urlForImage } from '@/lib/sanity/image'
@@ -78,20 +79,22 @@ export default async function PortfolioPage() {
                     <Link
                       key={i}
                       href={`/portfolio/${slug}`}
-                      className={`block border border-gray-800 ${isSwatch ? 'bg-white' : ''}`}
+                      className={`relative block aspect-square border border-gray-800 ${isSwatch ? 'bg-white' : ''}`}
                     >
                       {project.afterImage ? (
-                        <img
+                        <Image
                           src={
                             isSwatch
                               ? urlForImage(project.afterImage).width(500).url()
                               : urlForImage(project.afterImage).width(500).height(500).url()
                           }
                           alt={project.title}
-                          className={`aspect-square w-full transition-opacity hover:opacity-90 ${isSwatch ? 'object-contain' : 'object-cover'}`}
+                          fill
+                          sizes="(min-width: 768px) 25vw, 50vw"
+                          className={`transition-opacity hover:opacity-90 ${isSwatch ? 'object-contain' : 'object-cover'}`}
                         />
                       ) : (
-                        <div className="flex aspect-square w-full items-center justify-center bg-gray-900 text-xs text-gray-500">
+                        <div className="flex h-full w-full items-center justify-center bg-gray-900 text-xs text-gray-500">
                           {project.title}
                         </div>
                       )}
