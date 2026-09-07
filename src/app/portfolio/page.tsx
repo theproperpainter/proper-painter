@@ -11,7 +11,8 @@ const CATEGORY_ORDER = [
   'Interior Painting',
   'Cabinet Painting',
   'Restoration',
-  'Wallpaper & Faux Finishes',
+  'Wallpaper',
+  'Faux Finishes',
   'Color Consultation & Design',
 ]
 
@@ -60,21 +61,35 @@ export default async function PortfolioPage() {
                 </Link>
               </div>
               <div className="mt-6 grid grid-cols-2 gap-3 md:grid-cols-4 md:gap-5">
-                {preview.map((project, i) => (
-                  <Link key={i} href={`/portfolio/${slug}`} className="block border border-gray-800">
-                    {project.afterImage ? (
-                      <img
-                        src={urlForImage(project.afterImage).width(500).height(500).url()}
-                        alt={project.title}
-                        className="aspect-square w-full object-cover transition-opacity hover:opacity-90"
-                      />
-                    ) : (
-                      <div className="flex aspect-square w-full items-center justify-center bg-gray-900 text-xs text-gray-500">
-                        {project.title}
-                      </div>
-                    )}
-                  </Link>
-                ))}
+                {preview.map((project, i) => {
+                  // Faux Finishes source photos are texture swatches shot on a
+                  // white mat, not room photos — object-cover would crop into
+                  // that white border oddly, so show the whole swatch instead.
+                  const isSwatch = category === 'Faux Finishes'
+                  return (
+                    <Link
+                      key={i}
+                      href={`/portfolio/${slug}`}
+                      className={`block border border-gray-800 ${isSwatch ? 'bg-white' : ''}`}
+                    >
+                      {project.afterImage ? (
+                        <img
+                          src={
+                            isSwatch
+                              ? urlForImage(project.afterImage).width(500).url()
+                              : urlForImage(project.afterImage).width(500).height(500).url()
+                          }
+                          alt={project.title}
+                          className={`aspect-square w-full transition-opacity hover:opacity-90 ${isSwatch ? 'object-contain' : 'object-cover'}`}
+                        />
+                      ) : (
+                        <div className="flex aspect-square w-full items-center justify-center bg-gray-900 text-xs text-gray-500">
+                          {project.title}
+                        </div>
+                      )}
+                    </Link>
+                  )
+                })}
               </div>
             </div>
           </Container>

@@ -10,6 +10,7 @@ import InteriorPaintingPage from './services/interior-painting/page'
 import CabinetPaintingPage from './services/cabinetpainting/page'
 import MinorRestorationPage from './services/minor-restoration/page'
 import WallpaperPage from './services/wallpaper/page'
+import FauxFinishesPage from './services/faux-finishes/page'
 import ColorConsultPage from './services/colorconsult/page'
 import ReviewsPage from './reviews/page'
 
@@ -28,7 +29,8 @@ jest.mock('@/lib/sanity/queries', () => ({
         'interior-painting': 'Interior Painting',
         'cabinetpainting': 'Cabinet Painting',
         'minor-restoration': 'Restoration',
-        'wallpaper': 'Wallpaper & Faux Finishes',
+        'wallpaper': 'Wallpaper',
+        'faux-finishes': 'Faux Finishes',
         'colorconsult': 'Color Consultation',
       }[slug] ?? 'Interior Painting',
       slug: { current: slug },
@@ -63,6 +65,7 @@ const pages: [string, () => ReactElement | Promise<ReactElement>, RegExp][] = [
   ['cabinet painting', CabinetPaintingPage, /cabinet/i],
   ['minor restoration', MinorRestorationPage, /restoration/i],
   ['wallpaper', WallpaperPage, /wallpaper/i],
+  ['faux finishes', FauxFinishesPage, /faux finishes/i],
   ['color consult', ColorConsultPage, /color consult/i],
   ['reviews', ReviewsPage, /testimonials/i],
 ]

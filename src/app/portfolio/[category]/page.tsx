@@ -4,6 +4,7 @@ import { getPortfolioProjectsByCategory, getPortfolioCategories } from '@/lib/sa
 import { urlForImage } from '@/lib/sanity/image'
 import { Container } from '@/components/ui/section'
 import { slugify } from '@/lib/slugify'
+import PortfolioCard from '@/components/portfolio-card'
 
 export default async function PortfolioCategoryPage({
   params,
@@ -31,30 +32,44 @@ export default async function PortfolioCategoryPage({
           <p className="mt-2 text-gray-400">{projects.length} photos</p>
         </div>
       </Container>
-      <div>
-        {projects.map((project, i) => (
-          <div key={i} className="border-t border-gray-800">
-            {project.afterImage ? (
-              <img
-                src={urlForImage(project.afterImage).width(1600).height(1200).url()}
-                alt={project.title}
-                className="h-[55vh] w-full object-cover md:h-[80vh]"
-              />
-            ) : (
-              <div className="flex h-[55vh] w-full items-center justify-center bg-gray-900 text-gray-500 md:h-[80vh]">
-                {project.title}
-              </div>
-            )}
-            {project.description && (
-              <Container>
-                <div className="max-w-xl py-8 md:py-10">
-                  <p className="leading-relaxed text-gray-400">{project.description}</p>
-                </div>
-              </Container>
-            )}
+      {category === 'Faux Finishes' ? (
+        // These source photos are texture swatches shot on a white mat, not
+        // room photos — a full-bleed banner would either crop into that
+        // white border or blow the swatch up far past its real size, so
+        // show them as a plain grid instead, same as the service page.
+        <Container>
+          <div className="grid gap-6 pb-16 sm:grid-cols-2 md:gap-8 md:pb-24 lg:grid-cols-3">
+            {projects.map((project, i) => (
+              <PortfolioCard key={i} project={project} variant="swatch" />
+            ))}
           </div>
-        ))}
-      </div>
+        </Container>
+      ) : (
+        <div>
+          {projects.map((project, i) => (
+            <div key={i} className="border-t border-gray-800">
+              {project.afterImage ? (
+                <img
+                  src={urlForImage(project.afterImage).width(1600).height(1200).url()}
+                  alt={project.title}
+                  className="h-[55vh] w-full object-cover md:h-[80vh]"
+                />
+              ) : (
+                <div className="flex h-[55vh] w-full items-center justify-center bg-gray-900 text-gray-500 md:h-[80vh]">
+                  {project.title}
+                </div>
+              )}
+              {project.description && (
+                <Container>
+                  <div className="max-w-xl py-8 md:py-10">
+                    <p className="leading-relaxed text-gray-400">{project.description}</p>
+                  </div>
+                </Container>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
     </>
   )
 }
