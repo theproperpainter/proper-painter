@@ -28,6 +28,48 @@ export default async function AboutPage() {
             &ldquo;If it&rsquo;s worth doing, do your best.&rdquo;
           </p>
         </div>
+
+        <div className="mt-10 max-w-md border-t border-gray-800 pt-8">
+          <p className="text-xs tracking-wide text-gray-500 uppercase">Proud member of</p>
+          <div className="mt-4 flex flex-wrap items-center gap-4">
+            <a
+              href="https://pghhomebuilders.com/"
+              target="_blank"
+              rel="noreferrer"
+              className="flex h-16 w-28 items-center justify-center bg-white p-2 transition-opacity hover:opacity-80"
+            >
+              <img
+                src="/affiliations/bamp.png"
+                alt="Builders Association of Metropolitan Pittsburgh (BAMP)"
+                className="max-h-full max-w-full object-contain"
+              />
+            </a>
+            <a
+              href="https://pabuilders.org/about/professional-women-in-building/"
+              target="_blank"
+              rel="noreferrer"
+              className="flex h-16 w-28 items-center justify-center bg-white p-2 transition-opacity hover:opacity-80"
+            >
+              <img
+                src="/affiliations/pwb.png"
+                alt="PA Professional Women in Building (PWB)"
+                className="max-h-full max-w-full object-contain"
+              />
+            </a>
+            <a
+              href="https://paw.asid.org/"
+              target="_blank"
+              rel="noreferrer"
+              className="flex h-16 w-28 items-center justify-center border border-gray-800 bg-black p-2 transition-opacity hover:opacity-80"
+            >
+              <img
+                src="/affiliations/asid.svg"
+                alt="American Society of Interior Designers (ASID)"
+                className="max-h-full max-w-full object-contain"
+              />
+            </a>
+          </div>
+        </div>
       </div>
       <div className="order-1 md:order-2 md:w-1/2 md:border-l md:border-gray-800">
         {image ? (
