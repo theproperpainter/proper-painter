@@ -73,7 +73,34 @@ export default async function PortfolioCategoryPage({
         <div>
           {projects.map((project, i) => (
             <div key={i} className="border-t border-gray-800">
-              {project.afterImage ? (
+              {project.beforeImage && project.afterImage ? (
+                <div className="grid grid-cols-1 sm:grid-cols-2">
+                  <div className="relative h-[55vh] w-full sm:h-[80vh]">
+                    <Image
+                      src={urlForImage(project.beforeImage).width(1200).height(1600).url()}
+                      alt={`${project.title} — before`}
+                      fill
+                      sizes="(min-width: 640px) 50vw, 100vw"
+                      className="object-cover"
+                    />
+                    <span className="absolute top-4 left-4 bg-background px-3 py-1 text-xs tracking-wide text-foreground uppercase">
+                      Before
+                    </span>
+                  </div>
+                  <div className="relative h-[55vh] w-full border-t border-gray-800 sm:h-[80vh] sm:border-t-0 sm:border-l">
+                    <Image
+                      src={urlForImage(project.afterImage).width(1200).height(1600).url()}
+                      alt={`${project.title} — after`}
+                      fill
+                      sizes="(min-width: 640px) 50vw, 100vw"
+                      className="object-cover"
+                    />
+                    <span className="absolute top-4 left-4 bg-background px-3 py-1 text-xs tracking-wide text-foreground uppercase">
+                      After
+                    </span>
+                  </div>
+                </div>
+              ) : project.afterImage ? (
                 <div className="relative h-[55vh] w-full md:h-[80vh]">
                   <Image
                     src={urlForImage(project.afterImage).width(1600).height(1200).url()}
