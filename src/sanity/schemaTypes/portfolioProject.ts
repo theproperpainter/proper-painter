@@ -10,5 +10,11 @@ export const portfolioProject = defineType({
     defineField({ name: 'beforeImage', title: 'Before Image', type: 'image', options: { hotspot: true } }),
     defineField({ name: 'afterImage', title: 'After Image', type: 'image', options: { hotspot: true } }),
     defineField({ name: 'description', title: 'Description', type: 'text' }),
+    defineField({
+      name: 'order',
+      title: 'Display order',
+      type: 'number',
+      description: 'Lower numbers appear first within their category. Leave blank to sort after any ordered projects.',
+    }),
   ],
 })

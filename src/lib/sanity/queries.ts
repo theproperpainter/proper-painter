@@ -53,13 +53,13 @@ export async function getServiceBySlug(slug: string): Promise<Service | null> {
 
 export async function getPortfolioProjects(): Promise<PortfolioProject[]> {
   return sanityFetch<PortfolioProject[]>(
-    `*[_type == "portfolioProject"]{_id, title, category, afterImage, description}`
+    `*[_type == "portfolioProject"] | order(coalesce(order, 9999) asc) {_id, title, category, afterImage, description}`
   )
 }
 
 export async function getPortfolioProjectsByCategory(category: string): Promise<PortfolioProject[]> {
   return sanityFetch<PortfolioProject[]>(
-    `*[_type == "portfolioProject" && category == $category]{_id, title, category, afterImage, description}`,
+    `*[_type == "portfolioProject" && category == $category] | order(coalesce(order, 9999) asc) {_id, title, category, afterImage, description}`,
     { category }
   )
 }
