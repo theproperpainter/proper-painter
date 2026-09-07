@@ -44,3 +44,7 @@ yarn-error.log*
 next-env.d.ts
 
 dev.log
+
+# playwright MCP scratch output (screenshots/snapshots from browser verification)
+.playwright-mcp/
+.claude/
