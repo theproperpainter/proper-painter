@@ -19,7 +19,7 @@ export default async function AboutPage() {
             fully insured and licensed, built on a belief that craft and care go hand in hand.
           </p>
           <p className="text-base leading-relaxed text-gray-300">
-            Founded by Elizabeth Best, an architect by training, the business is guided by a
+            Founded by Elizabeth Best, an architectural designer by training, the business is guided by a
             mission that goes beyond painting walls: fostering and inspiring other women to
             enter the trades, proving that skilled, hands-on work is for anyone willing to do
             it properly.
