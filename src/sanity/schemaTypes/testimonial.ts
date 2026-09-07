@@ -11,7 +11,7 @@ export const testimonial = defineType({
       name: 'source',
       title: 'Source',
       type: 'string',
-      options: { list: ['HomeAdvisor', 'Direct'] },
+      options: { list: ['HomeAdvisor', 'Direct', 'Google'] },
     }),
   ],
 })
