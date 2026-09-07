@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import Script from 'next/script'
 import { Playfair_Display, Inter, Oswald } from 'next/font/google'
 import Header from '@/components/layout/header'
 import Footer from '@/components/layout/footer'
@@ -6,6 +7,7 @@ import { getSiteSettings, getTestimonials } from '@/lib/sanity/queries'
 import './globals.css'
 
 const SITE_URL = 'https://theproperpainter.com'
+const GA_MEASUREMENT_ID = 'G-62Q9X9LHBL'
 
 const playfairDisplay = Playfair_Display({
   subsets: ['latin'],
@@ -68,6 +70,18 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
+        <Script
+          src={`https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}`}
+          strategy="afterInteractive"
+        />
+        <Script id="google-analytics" strategy="afterInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', '${GA_MEASUREMENT_ID}');
+          `}
+        </Script>
         <Header />
         <main className="flex-1">{children}</main>
         <Footer />
