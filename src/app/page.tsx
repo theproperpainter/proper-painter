@@ -46,8 +46,8 @@ export default async function HomePage() {
             The Proper Painter
           </h1>
           <p className="max-w-sm font-serif text-xl leading-relaxed text-gray-400 italic md:text-2xl">
-            Every room, painted properly — by a woman-owned crew that treats your home like
-            their own.
+            Every room in the Pittsburgh Metropolitan Area, painted properly — by a woman-owned
+            crew that treats your home like their own.
           </p>
           <Link href="/contact" className={`${ctaClass} self-start text-red-500`}>
             Get a Quote

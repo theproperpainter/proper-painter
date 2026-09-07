@@ -23,8 +23,9 @@ export default async function AboutPage() {
         </h1>
         <div className="mt-8 max-w-md space-y-6">
           <p className="text-base leading-relaxed text-gray-300">
-            The Proper Painter is a women-owned and operated interior painting company,
-            fully insured and licensed, built on a belief that craft and care go hand in hand.
+            The Proper Painter is a women-owned and operated interior painting company serving
+            the Pittsburgh Metropolitan Area, fully insured and licensed, built on a belief that
+            craft and care go hand in hand.
           </p>
           <p className="text-base leading-relaxed text-gray-300">
             Founded by Elizabeth Best, an architectural designer by training, the business is guided by a

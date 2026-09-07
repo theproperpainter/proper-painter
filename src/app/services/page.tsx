@@ -19,7 +19,8 @@ export default async function ServicesPage() {
         <div className="pt-16 pb-10 md:pt-24 md:pb-14">
           <h1 className="text-4xl font-light tracking-tight md:text-5xl">Our Services</h1>
           <p className="mt-4 max-w-md text-lg text-gray-400">
-            Every job, done properly — see the work behind each one.
+            Every job, done properly, across the Pittsburgh Metropolitan Area — see the work
+            behind each one.
           </p>
         </div>
       </Container>

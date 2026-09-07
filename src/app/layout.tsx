@@ -49,6 +49,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
     url: SITE_URL,
     telephone: settings?.contactPhone,
     email: settings?.contactEmail,
+    areaServed: settings?.serviceArea,
     sameAs: settings?.socialLinks?.map((link) => link.url) ?? [],
     ...(testimonials.length > 0 && {
       aggregateRating: {

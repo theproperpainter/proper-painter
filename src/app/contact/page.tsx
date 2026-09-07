@@ -37,6 +37,12 @@ export default async function ContactPage() {
                 <dd className="text-base">{settings.contactEmail}</dd>
               </div>
             )}
+            {settings?.serviceArea && (
+              <div className="flex items-baseline justify-between border-b border-gray-800 py-3">
+                <dt className="text-xs text-gray-500">Serving</dt>
+                <dd className="text-base">{settings.serviceArea}</dd>
+              </div>
+            )}
           </dl>
         </div>
 

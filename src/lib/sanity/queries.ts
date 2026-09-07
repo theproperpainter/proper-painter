@@ -36,6 +36,7 @@ export interface TeamMember {
 export interface SiteSettings {
   contactEmail?: string
   contactPhone?: string
+  serviceArea?: string
   socialLinks?: { platform: string; url: string }[]
   logo?: SanityImage
 }
@@ -80,6 +81,6 @@ export async function getTeamMember(): Promise<TeamMember | null> {
 
 export async function getSiteSettings(): Promise<SiteSettings | null> {
   return sanityFetch<SiteSettings | null>(
-    `*[_id == "siteSettings"][0]{contactEmail, contactPhone, socialLinks, logo}`
+    `*[_id == "siteSettings"][0]{contactEmail, contactPhone, serviceArea, socialLinks, logo}`
   )
 }
