@@ -1,5 +1,13 @@
+import type { Metadata } from 'next'
 import { getPortfolioProjects, getAllServices } from '@/lib/sanity/queries'
 import { urlForImage } from '@/lib/sanity/image'
+
+export const metadata: Metadata = {
+  title: 'About Us',
+  description:
+    "Meet The Proper Painter, a women-owned and operated interior painting company in Pittsburgh, PA, founded by architectural designer Elizabeth Best.",
+  alternates: { canonical: '/about' },
+}
 
 export default async function AboutPage() {
   const [projects, services] = await Promise.all([getPortfolioProjects(), getAllServices()])

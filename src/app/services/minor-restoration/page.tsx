@@ -1,3 +1,4 @@
+import type { Metadata } from 'next'
 import { getServiceBySlug, getPortfolioProjectsByCategory } from '@/lib/sanity/queries'
 import { urlForImage } from '@/lib/sanity/image'
 import PortfolioCard from '@/components/portfolio-card'
@@ -5,6 +6,13 @@ import { Section } from '@/components/ui/section'
 
 const SLUG = 'minor-restoration'
 const CATEGORY = 'Restoration'
+
+export const metadata: Metadata = {
+  title: 'Restoration & Repair Services',
+  description:
+    'Drywall repair, ceiling fixes, and minor restoration services from a detail-focused, women-owned painting company in Pittsburgh, PA.',
+  alternates: { canonical: '/services/minor-restoration' },
+}
 
 export default async function MinorRestorationPage() {
   const [service, projects] = await Promise.all([

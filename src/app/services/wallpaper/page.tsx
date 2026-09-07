@@ -1,3 +1,4 @@
+import type { Metadata } from 'next'
 import { getServiceBySlug, getPortfolioProjectsByCategory } from '@/lib/sanity/queries'
 import { urlForImage } from '@/lib/sanity/image'
 import PortfolioCard from '@/components/portfolio-card'
@@ -5,6 +6,13 @@ import { Section } from '@/components/ui/section'
 
 const SLUG = 'wallpaper'
 const CATEGORY = 'Wallpaper'
+
+export const metadata: Metadata = {
+  title: 'Wallpaper Installation',
+  description:
+    'Professional wallpaper hanging and installation services in Pittsburgh, PA. See real rooms transformed by our women-owned team.',
+  alternates: { canonical: '/services/wallpaper' },
+}
 
 export default async function WallpaperPage() {
   const [service, projects] = await Promise.all([

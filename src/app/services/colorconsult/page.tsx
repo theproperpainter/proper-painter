@@ -1,8 +1,16 @@
+import type { Metadata } from 'next'
 import { getServiceBySlug } from '@/lib/sanity/queries'
 import { urlForImage } from '@/lib/sanity/image'
 import { Section } from '@/components/ui/section'
 
 const SLUG = 'colorconsult'
+
+export const metadata: Metadata = {
+  title: 'Color Consultation & Design',
+  description:
+    'Expert color consultation and design services from The Proper Painter, a women-owned painting company serving Pittsburgh, PA.',
+  alternates: { canonical: '/services/colorconsult' },
+}
 
 export default async function ColorConsultPage() {
   const service = await getServiceBySlug(SLUG)

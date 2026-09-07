@@ -1,3 +1,4 @@
+import type { Metadata } from 'next'
 import { getServiceBySlug, getPortfolioProjectsByCategory } from '@/lib/sanity/queries'
 import { urlForImage } from '@/lib/sanity/image'
 import PortfolioCard from '@/components/portfolio-card'
@@ -5,6 +6,13 @@ import { Section } from '@/components/ui/section'
 
 const SLUG = 'interior-painting'
 const CATEGORY = 'Interior Painting'
+
+export const metadata: Metadata = {
+  title: 'Interior Painting Services',
+  description:
+    'Professional interior painting services in Pittsburgh, PA from a women-owned, fully insured team. See real recent projects.',
+  alternates: { canonical: '/services/interior-painting' },
+}
 
 export default async function InteriorPaintingPage() {
   const [service, projects] = await Promise.all([

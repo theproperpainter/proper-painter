@@ -1,3 +1,4 @@
+import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { getPortfolioProjectsByCategory, getPortfolioCategories } from '@/lib/sanity/queries'
@@ -6,14 +7,37 @@ import { Container } from '@/components/ui/section'
 import { slugify } from '@/lib/slugify'
 import PortfolioCard from '@/components/portfolio-card'
 
+async function resolveCategory(slug: string): Promise<string | undefined> {
+  const categories = await getPortfolioCategories()
+  return categories.find((c) => slugify(c) === slug)
+}
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ category: string }>
+}): Promise<Metadata> {
+  const { category: slug } = await params
+  const category = await resolveCategory(slug)
+
+  if (!category) {
+    return {}
+  }
+
+  return {
+    title: `${category} Portfolio`,
+    description: `Browse real ${category.toLowerCase()} project photos completed by The Proper Painter in Pittsburgh, PA.`,
+    alternates: { canonical: `/portfolio/${slug}` },
+  }
+}
+
 export default async function PortfolioCategoryPage({
   params,
 }: {
   params: Promise<{ category: string }>
 }) {
   const { category: slug } = await params
-  const categories = await getPortfolioCategories()
-  const category = categories.find((c) => slugify(c) === slug)
+  const category = await resolveCategory(slug)
 
   if (!category) {
     notFound()

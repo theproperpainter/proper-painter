@@ -1,5 +1,13 @@
+import type { Metadata } from 'next'
 import { getTeamMember, getPortfolioProjects } from '@/lib/sanity/queries'
 import { urlForImage } from '@/lib/sanity/image'
+
+export const metadata: Metadata = {
+  title: 'Meet Elizabeth Best',
+  description:
+    'Meet Elizabeth Best, architectural designer and owner of The Proper Painter, a women-owned interior painting company in Pittsburgh, PA.',
+  alternates: { canonical: '/team' },
+}
 
 export default async function TeamPage() {
   const [member, projects] = await Promise.all([getTeamMember(), getPortfolioProjects()])

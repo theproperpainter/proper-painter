@@ -1,8 +1,16 @@
+import type { Metadata } from 'next'
 import Link from 'next/link'
 import { getPortfolioProjects, getPortfolioCategories } from '@/lib/sanity/queries'
 import { urlForImage } from '@/lib/sanity/image'
 import { Container } from '@/components/ui/section'
 import { slugify } from '@/lib/slugify'
+
+export const metadata: Metadata = {
+  title: 'Portfolio',
+  description:
+    'Browse real before-and-after painting, wallpaper, cabinet, and restoration projects completed by The Proper Painter in Pittsburgh, PA.',
+  alternates: { canonical: '/portfolio' },
+}
 
 // Matches the order services appear elsewhere on the site. Any category not
 // listed here (e.g. one added later in Sanity) is appended after these, in

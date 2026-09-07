@@ -1,3 +1,4 @@
+import type { Metadata } from 'next'
 import { getServiceBySlug, getPortfolioProjectsByCategory } from '@/lib/sanity/queries'
 import { urlForImage } from '@/lib/sanity/image'
 import PortfolioCard from '@/components/portfolio-card'
@@ -5,6 +6,13 @@ import { Section } from '@/components/ui/section'
 
 const SLUG = 'faux-finishes'
 const CATEGORY = 'Faux Finishes'
+
+export const metadata: Metadata = {
+  title: 'Faux Finishes',
+  description:
+    'Custom faux finish and decorative painting techniques from The Proper Painter, a women-owned painting company serving Pittsburgh, PA.',
+  alternates: { canonical: '/services/faux-finishes' },
+}
 
 export default async function FauxFinishesPage() {
   const [service, projects] = await Promise.all([

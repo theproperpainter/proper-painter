@@ -1,6 +1,14 @@
+import type { Metadata } from 'next'
 import { getAllServices } from '@/lib/sanity/queries'
 import ServiceRow from '@/components/service-row'
 import { Container } from '@/components/ui/section'
+
+export const metadata: Metadata = {
+  title: 'Our Services',
+  description:
+    'Interior painting, cabinet painting, wallpaper installation, faux finishes, restoration, and color consultation services from a women-owned team in Pittsburgh, PA.',
+  alternates: { canonical: '/services' },
+}
 
 export default async function ServicesPage() {
   const services = await getAllServices()

@@ -1,5 +1,13 @@
+import type { Metadata } from 'next'
 import { getTestimonials } from '@/lib/sanity/queries'
 import { Container } from '@/components/ui/section'
+
+export const metadata: Metadata = {
+  title: 'Testimonials',
+  description:
+    'Real client testimonials for The Proper Painter, a 5-star rated, women-owned interior painting company serving Pittsburgh, PA.',
+  alternates: { canonical: '/reviews' },
+}
 
 export default async function ReviewsPage() {
   const testimonials = await getTestimonials()

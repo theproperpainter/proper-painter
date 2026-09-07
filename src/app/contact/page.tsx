@@ -1,6 +1,14 @@
+import type { Metadata } from 'next'
 import { getSiteSettings } from '@/lib/sanity/queries'
 import { Section } from '@/components/ui/section'
 import ContactForm from '@/components/contact-form'
+
+export const metadata: Metadata = {
+  title: 'Contact Us',
+  description:
+    'Get a quote from The Proper Painter, a women-owned interior painting company serving Pittsburgh, PA. Reach out today.',
+  alternates: { canonical: '/contact' },
+}
 
 export default async function ContactPage() {
   const settings = await getSiteSettings()
