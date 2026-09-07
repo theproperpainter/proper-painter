@@ -21,6 +21,6 @@ describe('sanityFetch', () => {
   it('delegates to the underlying client fetch and returns its result', async () => {
     const result = await sanityFetch<{ ok: boolean }>('*[_type == "service"]')
     expect(result).toEqual({ ok: true })
-    expect(sanityClient.fetch).toHaveBeenCalledWith('*[_type == "service"]', {})
+    expect(sanityClient.fetch).toHaveBeenCalledWith('*[_type == "service"]', {}, { next: { revalidate: 60 } })
   })
 })
