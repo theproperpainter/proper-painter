@@ -5,6 +5,11 @@ import { Container } from '@/components/ui/section'
 import type { Service } from '@/lib/sanity/queries'
 
 export default function ServiceRow({ service }: { service: Service }) {
+  // Color Consultation has no project photos of its own (by design — the
+  // service page shows only the summary), so "See the work" would link to a
+  // page with nothing to see.
+  const hasWork = service.slug.current !== 'colorconsult'
+
   return (
     <div className="border-t border-gray-800">
       <Link href={`/services/${service.slug.current}`} className="relative block h-[45vh] md:h-[70vh]">
@@ -26,12 +31,14 @@ export default function ServiceRow({ service }: { service: Service }) {
         <div className="max-w-xl py-8 md:py-10">
           <h3 className="text-2xl md:text-3xl">{service.title}</h3>
           {service.summary && <p className="mt-3 leading-relaxed text-gray-400">{service.summary}</p>}
-          <Link
-            href={`/services/${service.slug.current}`}
-            className="mt-4 inline-block text-sm underline underline-offset-4 hover:text-gray-400"
-          >
-            See the work
-          </Link>
+          {hasWork && (
+            <Link
+              href={`/services/${service.slug.current}`}
+              className="mt-4 inline-block text-sm underline underline-offset-4 hover:text-gray-400"
+            >
+              See the work
+            </Link>
+          )}
         </div>
       </Container>
     </div>
