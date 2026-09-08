@@ -11,8 +11,10 @@ import CabinetPaintingPage from './services/cabinetpainting/page'
 import MinorRestorationPage from './services/minor-restoration/page'
 import WallpaperPage from './services/wallpaper/page'
 import FauxFinishesPage from './services/faux-finishes/page'
+import FauxFinishesSamplesPage from './services/faux-finishes/samples/page'
 import ColorConsultPage from './services/colorconsult/page'
 import ReviewsPage from './reviews/page'
+import VideosPage from './videos/page'
 
 jest.mock('@/lib/sanity/queries', () => ({
   getAllServices: jest.fn().mockResolvedValue([
@@ -66,8 +68,10 @@ const pages: [string, () => ReactElement | Promise<ReactElement>, RegExp][] = [
   ['minor restoration', MinorRestorationPage, /restoration/i],
   ['wallpaper', WallpaperPage, /wallpaper/i],
   ['faux finishes', FauxFinishesPage, /faux finishes/i],
+  ['faux finishes samples', FauxFinishesSamplesPage, /sample finishes/i],
   ['color consult', ColorConsultPage, /color consult/i],
   ['reviews', ReviewsPage, /testimonials/i],
+  ['videos', VideosPage, /videos/i],
 ]
 
 describe('every site-map route', () => {

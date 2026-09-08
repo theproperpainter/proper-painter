@@ -66,7 +66,7 @@ export default async function AboutPage() {
                 src="/affiliations/pwb.png"
                 alt="PA Professional Women in Building (PWB)"
                 width={112}
-                height={64}
+                height={29}
                 className="max-h-full max-w-full object-contain"
               />
             </a>

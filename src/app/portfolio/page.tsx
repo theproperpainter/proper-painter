@@ -5,6 +5,7 @@ import { getPortfolioProjects, getPortfolioCategories } from '@/lib/sanity/queri
 import { urlForImage } from '@/lib/sanity/image'
 import { Container } from '@/components/ui/section'
 import { slugify } from '@/lib/slugify'
+import { DRESSER_PROJECT_ID, WOOD_PANEL_PROJECT_ID } from '@/lib/faux-finishes-picks'
 
 export const metadata: Metadata = {
   title: 'Portfolio',
@@ -52,7 +53,13 @@ export default async function PortfolioPage() {
       </Container>
 
       {categories.map((category) => {
-        const categoryProjects = projects.filter((p) => p.category === category)
+        // The portfolio is real completed work — Faux Finishes only shows the
+        // dresser and wood-panel projects here; the rest are texture swatches
+        // that live on the Sample Finishes page instead.
+        const categoryProjects =
+          category === 'Faux Finishes'
+            ? projects.filter((p) => p._id === DRESSER_PROJECT_ID || p._id === WOOD_PANEL_PROJECT_ID)
+            : projects.filter((p) => p.category === category)
         if (categoryProjects.length === 0) return null
         const preview = categoryProjects.slice(0, 4)
         const slug = slugify(category)

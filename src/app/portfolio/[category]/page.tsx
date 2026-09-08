@@ -1,12 +1,14 @@
 import type { Metadata } from 'next'
 import Image from 'next/image'
 import Link from 'next/link'
+import { Play } from 'lucide-react'
 import { notFound } from 'next/navigation'
 import { getPortfolioProjectsByCategory, getPortfolioCategories } from '@/lib/sanity/queries'
 import { urlForImage } from '@/lib/sanity/image'
 import { Container } from '@/components/ui/section'
 import { slugify } from '@/lib/slugify'
 import PortfolioCard from '@/components/portfolio-card'
+import { DRESSER_PROJECT_ID, WOOD_PANEL_PROJECT_ID } from '@/lib/faux-finishes-picks'
 
 async function resolveCategory(slug: string): Promise<string | undefined> {
   const categories = await getPortfolioCategories()
@@ -45,6 +47,15 @@ export default async function PortfolioCategoryPage({
   }
 
   const projects = await getPortfolioProjectsByCategory(category)
+  const isFauxFinishes = category === 'Faux Finishes'
+  // The portfolio is real completed work, not the finish catalog — only the
+  // dresser and wood-panel photos are actual projects; the rest are texture
+  // swatches that belong on the Sample Finishes page instead.
+  const dresserProject = projects.find((p) => p._id === DRESSER_PROJECT_ID)
+  const woodPanelProject = projects.find((p) => p._id === WOOD_PANEL_PROJECT_ID)
+  const fauxFinishesProjects = [dresserProject, woodPanelProject].filter(
+    (p): p is NonNullable<typeof p> => Boolean(p)
+  )
 
   return (
     <>
@@ -54,20 +65,46 @@ export default async function PortfolioCategoryPage({
             &larr; All portfolio
           </Link>
           <h1 className="mt-4 text-4xl font-light tracking-tight md:text-5xl">{category}</h1>
-          <p className="mt-2 text-gray-400">{projects.length} photos</p>
+          <p className="mt-2 text-gray-400">
+            {isFauxFinishes ? fauxFinishesProjects.length : projects.length} photos
+          </p>
         </div>
       </Container>
-      {category === 'Faux Finishes' ? (
+      {isFauxFinishes ? (
         // These source photos are texture swatches shot on a white mat, not
         // room photos — a full-bleed banner would either crop into that
         // white border or blow the swatch up far past its real size, so
         // show them as a plain grid instead, same as the service page.
         <Container>
-          <div className="grid gap-6 pb-16 sm:grid-cols-2 md:gap-8 md:pb-24 lg:grid-cols-3">
-            {projects.map((project, i) => (
-              <PortfolioCard key={i} project={project} variant="swatch" />
-            ))}
+          <div className="grid max-w-2xl gap-6 pb-8 sm:grid-cols-2">
+            {woodPanelProject?.afterImage && (
+              <Link
+                href="/videos"
+                className="group relative block h-64 border border-gray-800"
+                aria-label="Watch the faux wood finish painting video"
+              >
+                <Image
+                  src={urlForImage(woodPanelProject.afterImage).width(800).height(600).url()}
+                  alt={woodPanelProject.title}
+                  fill
+                  sizes="(min-width: 640px) 50vw, 100vw"
+                  className="object-cover transition-opacity group-hover:opacity-80"
+                />
+                <div className="absolute inset-0 flex items-center justify-center bg-black/20 transition-colors group-hover:bg-black/40">
+                  <span className="flex h-14 w-14 items-center justify-center rounded-full bg-white/90">
+                    <Play className="h-6 w-6 translate-x-0.5 fill-black text-black" />
+                  </span>
+                </div>
+              </Link>
+            )}
+            {dresserProject && <PortfolioCard project={dresserProject} variant="swatch" />}
           </div>
+          <Link
+            href="/services/faux-finishes/samples"
+            className="inline-block pb-16 text-sm underline underline-offset-4 hover:text-gray-400 md:pb-24"
+          >
+            See Sample Finishes
+          </Link>
         </Container>
       ) : (
         <div>

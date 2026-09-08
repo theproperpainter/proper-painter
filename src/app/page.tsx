@@ -128,9 +128,60 @@ export default async function HomePage() {
             floats over the image, and scrolling reveals it tucking underneath. */}
         <div className="relative z-10 -mt-16 flex flex-col items-start gap-8 border border-gray-800 bg-background px-8 py-10 md:-mt-24 md:flex-row md:items-center md:justify-between md:px-12 md:py-14">
           <h2 className="max-w-lg text-3xl md:text-4xl">Your next room starts here.</h2>
-          <Link href="/contact" className={ctaClass}>
-            Contact Us
+          <Link href="/contact" className={`${ctaClass} text-red-500`}>
+            Get a Quote
           </Link>
+        </div>
+      </Container>
+
+      {/* Proud member of: sits at the very bottom of the page, right above the
+          footer's "Women-Owned & Operated" line — the affiliations back up
+          that claim right where a visitor reads it. */}
+      <Container>
+        <div className="border-t border-gray-800 py-16 md:py-20">
+          <p className="text-xs tracking-wide text-gray-500 uppercase">Proud member of</p>
+          <div className="mt-4 flex flex-wrap items-center gap-4">
+            <a
+              href="https://pghhomebuilders.com/"
+              target="_blank"
+              rel="noreferrer"
+              className="flex h-16 w-28 items-center justify-center bg-white p-2 transition-opacity hover:opacity-80"
+            >
+              <Image
+                src="/affiliations/bamp.png"
+                alt="Builders Association of Metropolitan Pittsburgh (BAMP)"
+                width={112}
+                height={64}
+                className="max-h-full max-w-full object-contain"
+              />
+            </a>
+            <a
+              href="https://pabuilders.org/about/professional-women-in-building/"
+              target="_blank"
+              rel="noreferrer"
+              className="flex h-16 w-28 items-center justify-center bg-white p-2 transition-opacity hover:opacity-80"
+            >
+              <Image
+                src="/affiliations/pwb.png"
+                alt="PA Professional Women in Building (PWB)"
+                width={112}
+                height={29}
+                className="max-h-full max-w-full object-contain"
+              />
+            </a>
+            <a
+              href="https://paw.asid.org/"
+              target="_blank"
+              rel="noreferrer"
+              className="flex h-16 w-28 items-center justify-center border border-gray-800 bg-black p-2 transition-opacity hover:opacity-80"
+            >
+              <img
+                src="/affiliations/asid.svg"
+                alt="American Society of Interior Designers (ASID)"
+                className="max-h-full max-w-full object-contain"
+              />
+            </a>
+          </div>
         </div>
       </Container>
     </>
