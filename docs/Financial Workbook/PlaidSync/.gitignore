@@ -1,0 +1,10 @@
+﻿.env
+oauth_client_secret.json
+token.json
+plaid_config.json
+sw_sync.log
+sw_push_csv.log
+staging_sw_invoices.csv
+staging_sw_payments.csv
+debug_*.png
+_sw_downloads/
