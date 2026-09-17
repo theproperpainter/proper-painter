@@ -78,11 +78,11 @@ jobs:
       # resolve relative to the repo root (CWD) instead — wrong directory.
       - name: Create .env file
         run: |
-          cat > "docs/Financial Workbook/PlaidSync/.env" <<EOF
-SWILLIAMS_EMAIL=${{ secrets.SWILLIAMS_EMAIL }}
-SWILLIAMS_PW=${{ secrets.SWILLIAMS_PW }}
-SPREADSHEET_ID=${{ secrets.SPREADSHEET_ID }}
-EOF
+          cat > "docs/Financial Workbook/PlaidSync/.env" <<'EOF'
+          SWILLIAMS_EMAIL=${{ secrets.SWILLIAMS_EMAIL }}
+          SWILLIAMS_PW=${{ secrets.SWILLIAMS_PW }}
+          SPREADSHEET_ID=${{ secrets.SPREADSHEET_ID }}
+          EOF
 
       # ── 7. Run the sync ─────────────────────────────────────────────────
       - name: Run SW sync
