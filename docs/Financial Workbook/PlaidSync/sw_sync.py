@@ -950,17 +950,11 @@ def _push_to_sheets(invoice_records: list[dict], payment_records: list[dict]):
     """
     Push SW invoice and payment records to the 'SW Credit Account' tab.
 
-    Supports TWO auth modes — auto-detected from the credentials file:
-
-    1. SERVICE ACCOUNT (preferred for GitHub Actions / cloud):
-       • Set GOOGLE_CREDENTIALS_JSON to a service_account.json file
-       • Share the Google Sheet with the service account email (Editor access)
-       • No browser needed — works headlessly forever
-
-    2. OAUTH DESKTOP (for local / first-time use):
-       • Set GOOGLE_CREDENTIALS_JSON to an oauth_client_secret.json file
-       • First run opens a browser for one-time Google sign-in → saves token.json
-       • Subsequent runs auto-refresh without a browser
+    Uses Google OAuth 2.0 Desktop flow:
+      • Set GOOGLE_CREDENTIALS_JSON to oauth_client_secret.json
+      • First run opens a browser once for Google sign-in → saves token.json
+      • GitHub Actions: token.json is written from the GOOGLE_TOKEN_JSON secret
+      • Subsequent runs auto-refresh silently (no browser needed)
 
     Dedup IDs (col E):
       Invoices  → "SW-INV-{inv_num}"
@@ -970,7 +964,7 @@ def _push_to_sheets(invoice_records: list[dict], payment_records: list[dict]):
 
     .env keys required:
       SPREADSHEET_ID           — from the Sheets URL
-      GOOGLE_CREDENTIALS_JSON  — path to service_account.json or oauth_client_secret.json
+      GOOGLE_CREDENTIALS_JSON  — path to oauth_client_secret.json
     """
     spreadsheet_id = os.getenv('SPREADSHEET_ID', '').strip()
     if not spreadsheet_id:
@@ -988,8 +982,9 @@ def _push_to_sheets(invoice_records: list[dict], payment_records: list[dict]):
         return 0, 0
 
     try:
-        import json as _json
+        from google.oauth2.credentials import Credentials
         from google.auth.transport.requests import Request
+        from google_auth_oauthlib.flow import InstalledAppFlow
         from googleapiclient.discovery import build
     except ImportError:
         log.warning("Missing Google libraries — skipping Sheets push")
@@ -1002,40 +997,29 @@ def _push_to_sheets(invoice_records: list[dict], payment_records: list[dict]):
     try:
         creds = None
 
-        # ── Detect credential type ────────────────────────────────────────
-        with open(creds_path) as f:
-            creds_data = _json.load(f)
-        is_service_account = creds_data.get('type') == 'service_account'
+        # ── Load token.json (cached OAuth token) ──────────────────────────
+        # In GitHub Actions, token.json is written from the GOOGLE_TOKEN_JSON secret
+        # before this script runs — no browser is ever needed in CI.
+        if token_path.exists():
+            creds = Credentials.from_authorized_user_file(str(token_path), SCOPES)
+            log.info(f"Loaded Google OAuth token from {token_path.name}")
 
-        if is_service_account:
-            # ── Service account auth (GitHub Actions / cloud) ─────────────
-            from google.oauth2.service_account import Credentials as SACredentials
-            creds = SACredentials.from_service_account_file(str(creds_path), scopes=SCOPES)
-            log.info("Using service account credentials")
+        # ── Refresh silently if expired, or do first-time browser login ───
+        if not creds or not creds.valid:
+            if creds and creds.expired and creds.refresh_token:
+                creds.refresh(Request())
+                log.info("Google OAuth token refreshed silently")
+            else:
+                # First-time local setup only — opens browser once to authorize
+                log.info("First-run Google auth — opening browser for one-time sign-in...")
+                flow = InstalledAppFlow.from_client_secrets_file(str(creds_path), SCOPES)
+                creds = flow.run_local_server(port=0)
+                log.info("Google sign-in complete")
 
-        else:
-            # ── OAuth Desktop auth (local use) ────────────────────────────
-            from google.oauth2.credentials import Credentials
-            from google_auth_oauthlib.flow import InstalledAppFlow
-
-            # Load cached token if available
-            if token_path.exists():
-                creds = Credentials.from_authorized_user_file(str(token_path), SCOPES)
-
-            # ── Refresh expired token, or run first-time browser login ──
-            if not creds or not creds.valid:
-                if creds and creds.expired and creds.refresh_token:
-                    creds.refresh(Request())
-                    log.info("Google OAuth credentials refreshed silently")
-                else:
-                    log.info("First-run Google auth — opening browser for one-time sign-in...")
-                    flow = InstalledAppFlow.from_client_secrets_file(str(creds_path), SCOPES)
-                    creds = flow.run_local_server(port=0)
-                    log.info("Google sign-in complete")
-                # Persist token so subsequent runs need no browser
-                with open(token_path, 'w') as tf:
-                    tf.write(creds.to_json())
-                log.info(f"Google token saved → {token_path.name}")
+            # Save refreshed/new token for next run
+            with open(token_path, 'w') as tf:
+                tf.write(creds.to_json())
+            log.info(f"Google token saved → {token_path.name}")
 
         service = build('sheets', 'v4', credentials=creds)
         api     = service.spreadsheets()
@@ -1113,18 +1097,40 @@ def _push_to_sheets(invoice_records: list[dict], payment_records: list[dict]):
 
         updates = []
 
-        if new_invoice_rows and purchases_hdr_row:
-            # Header row + 1 sub-header row → data starts 2 rows below header
-            data_start  = purchases_hdr_row + 2
-            section_end = (payments_hdr_row - 1) if payments_hdr_row else len(rows)
-            insert_at   = _last_data_row(data_start, section_end) + 1
+        # Base "next empty row" = one past the last row that has any content
+        next_empty = _last_data_row(1, len(rows)) + 1
+
+        if new_invoice_rows:
+            if purchases_hdr_row:
+                # Structured sheet: insert after last invoice row in the section
+                data_start  = purchases_hdr_row + 2
+                section_end = (payments_hdr_row - 1) if payments_hdr_row else len(rows)
+                insert_at   = _last_data_row(data_start, section_end) + 1
+            else:
+                # No section header found — append after all existing data
+                log.warning(
+                    "No 'PURCHASES'/'CHARGES' row found in col A — "
+                    "appending invoices at row %d (add a 'PURCHASES' row to use section mode)",
+                    next_empty,
+                )
+                insert_at = next_empty
             rng = f"'{SHEET}'!A{insert_at}:F{insert_at + len(new_invoice_rows) - 1}"
             updates.append({'range': rng, 'values': new_invoice_rows})
             log.info(f"Queued {len(new_invoice_rows)} invoice row(s) → Sheet row {insert_at}")
+            # Advance the "next empty" pointer for payments
+            next_empty = insert_at + len(new_invoice_rows)
 
-        if new_payment_rows and payments_hdr_row:
-            pay_start = payments_hdr_row + 2
-            insert_at = _last_data_row(pay_start, len(rows)) + 1
+        if new_payment_rows:
+            if payments_hdr_row:
+                pay_start = payments_hdr_row + 2
+                insert_at = _last_data_row(pay_start, len(rows)) + 1
+            else:
+                log.warning(
+                    "No 'PAYMENTS' row found in col A — "
+                    "appending payments at row %d (add a 'PAYMENTS' row to use section mode)",
+                    next_empty,
+                )
+                insert_at = next_empty
             rng = f"'{SHEET}'!A{insert_at}:F{insert_at + len(new_payment_rows) - 1}"
             updates.append({'range': rng, 'values': new_payment_rows})
             log.info(f"Queued {len(new_payment_rows)} payment row(s) → Sheet row {insert_at}")
@@ -1139,8 +1145,8 @@ def _push_to_sheets(invoice_records: list[dict], payment_records: list[dict]):
                 f"Sheets push complete: "
                 f"{len(new_invoice_rows)} invoice(s), {len(new_payment_rows)} payment(s) added"
             )
-        else:
-            log.info("Sheets push: no new records (all already present)")
+        elif not new_invoice_rows and not new_payment_rows:
+            log.info("Sheets push: no new records (all already present or deduped)")
 
         return len(new_invoice_rows), len(new_payment_rows)
 
