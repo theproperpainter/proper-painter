@@ -72,14 +72,17 @@ jobs:
           echo '${{ secrets.GOOGLE_TOKEN_JSON }}'       > "docs/Financial Workbook/PlaidSync/token.json"
 
       # ── 6. Create .env for sw_sync.py ───────────────────────────────────
+      # NOTE: GOOGLE_CREDENTIALS_JSON is intentionally omitted here.
+      # The script defaults to SCRIPT_DIR/oauth_client_secret.json, which is
+      # exactly where step 5 writes it. Setting it to a bare filename would
+      # resolve relative to the repo root (CWD) instead — wrong directory.
       - name: Create .env file
         run: |
-          cat > "docs/Financial Workbook/PlaidSync/.env" << 'EOF'
-          SWILLIAMS_EMAIL=${{ secrets.SWILLIAMS_EMAIL }}
-          SWILLIAMS_PW=${{ secrets.SWILLIAMS_PW }}
-          SPREADSHEET_ID=${{ secrets.SPREADSHEET_ID }}
-          GOOGLE_CREDENTIALS_JSON=oauth_client_secret.json
-          EOF
+          cat > "docs/Financial Workbook/PlaidSync/.env" <<EOF
+SWILLIAMS_EMAIL=${{ secrets.SWILLIAMS_EMAIL }}
+SWILLIAMS_PW=${{ secrets.SWILLIAMS_PW }}
+SPREADSHEET_ID=${{ secrets.SPREADSHEET_ID }}
+EOF
 
       # ── 7. Run the sync ─────────────────────────────────────────────────
       - name: Run SW sync
