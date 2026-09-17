@@ -85,7 +85,19 @@ jobs:
       - name: Run SW sync
         run: python "docs/Financial Workbook/PlaidSync/sw_sync.py"
 
-      # ── 8. Upload debug screenshots if the run fails ─────────────────────
+      # ── 8. Print sync log to console (always visible in step output) ───────
+      - name: Print sync log
+        if: always()
+        run: |
+          LOG="docs/Financial Workbook/PlaidSync/sw_sync.log"
+          if [ -f "$LOG" ]; then
+            echo "===== sw_sync.log ====="
+            cat "$LOG"
+          else
+            echo "sw_sync.log was not created — script may have crashed before logging started."
+          fi
+
+      # ── 9. Upload debug screenshots if the run fails ─────────────────────
       - name: Upload debug screenshots on failure
         if: failure()
         uses: actions/upload-artifact@v4
@@ -95,9 +107,9 @@ jobs:
           if-no-files-found: ignore
           retention-days: 7
 
-      # ── 9. Upload sync log on failure ────────────────────────────────────
+      # ── 10. Upload sync log (always) ─────────────────────────────────────
       - name: Upload sync log
-        if: failure()
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: sw-sync-log
