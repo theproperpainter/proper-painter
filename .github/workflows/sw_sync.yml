@@ -1,22 +1,23 @@
 ##############################################################################
 # THE PROPER PAINTER — Sherwin-Williams Daily Sync
 # ─────────────────────────────────────────────────
-# Runs sw_sync.py every morning at 6 AM ET (10:00 UTC / 11:00 UTC during EDT).
+# Runs sw_sync.py every morning at 6 AM ET (10:00 UTC).
 # Logs into the SW PRO+ portal, downloads new invoices and payments,
 # and pushes them directly to the SW Credit Account tab in Google Sheets.
 #
 # REQUIRED GITHUB SECRETS (Settings → Secrets and variables → Actions → New):
-#   SWILLIAMS_EMAIL            — SW PRO+ portal login email
-#   SWILLIAMS_PW               — SW PRO+ portal password
-#   SPREADSHEET_ID             — Google Sheet ID (from the Sheets URL)
-#   GOOGLE_SERVICE_ACCOUNT_JSON — Full contents of your service_account.json file
+#   SWILLIAMS_EMAIL         — SW PRO+ portal login email
+#   SWILLIAMS_PW            — SW PRO+ portal password
+#   SPREADSHEET_ID          — Google Sheet ID (from the Sheets URL)
+#   GOOGLE_CREDENTIALS_JSON — Full contents of your oauth_client_secret.json
+#   GOOGLE_TOKEN_JSON       — Full contents of token.json (generated on first local run)
 #
 # ONE-TIME SETUP (see SW_SYNC_SETUP.md for step-by-step):
-#   1. Create a Google Cloud project → enable Sheets API
-#   2. Create a Service Account → download JSON key
-#   3. Share the Google Sheet with the service account email (Editor)
-#   4. Add the four secrets above to this GitHub repo
-#   5. Push this file to .github/workflows/sw_sync.yml → it runs automatically
+#   1. Run sw_sync.py once locally — it opens a browser for Google sign-in
+#      and saves token.json next to the script
+#   2. Copy the contents of token.json as the GOOGLE_TOKEN_JSON secret
+#   3. Add the other four secrets above
+#   4. Push this file to .github/workflows/sw_sync.yml → runs automatically
 ##############################################################################
 
 name: SW Credit Account Sync
@@ -24,7 +25,6 @@ name: SW Credit Account Sync
 on:
   schedule:
     # 6 AM ET = 10:00 UTC (EST) / 11:00 UTC (EDT)
-    # Runs every day at 10:00 UTC; naturally shifts with daylight saving
     - cron: '0 10 * * *'
 
   # Allow manual trigger from the Actions tab (useful for testing)
@@ -34,7 +34,7 @@ jobs:
   sync:
     name: Sync SW Invoices & Payments → Google Sheets
     runs-on: ubuntu-latest
-    timeout-minutes: 20   # abort if the script hangs
+    timeout-minutes: 20
 
     steps:
 
@@ -47,7 +47,6 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-          cache: 'pip'
 
       # ── 3. Install Python dependencies ──────────────────────────────────
       - name: Install Python dependencies
@@ -64,36 +63,35 @@ jobs:
       - name: Install Playwright browsers
         run: playwright install chromium --with-deps
 
-      # ── 5. Write Google service account credentials ──────────────────────
-      # The secret contains the full JSON — write it to a temp file.
-      # The file is never committed; it only exists for this run.
-      - name: Write Google service account credentials
+      # ── 5. Write Google OAuth credentials ───────────────────────────────
+      # oauth_client_secret.json — the app credentials (not user-specific)
+      # token.json              — the user's cached OAuth token (no browser needed)
+      - name: Write Google OAuth credentials
         run: |
-          echo '${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}' > /tmp/service_account.json
+          echo '${{ secrets.GOOGLE_CREDENTIALS_JSON }}' > "docs/Financial Workbook/PlaidSync/oauth_client_secret.json"
+          echo '${{ secrets.GOOGLE_TOKEN_JSON }}'       > "docs/Financial Workbook/PlaidSync/token.json"
 
       # ── 6. Create .env for sw_sync.py ───────────────────────────────────
       - name: Create .env file
         run: |
-          cat > PlaidSync/.env << 'EOF'
+          cat > "docs/Financial Workbook/PlaidSync/.env" << 'EOF'
           SWILLIAMS_EMAIL=${{ secrets.SWILLIAMS_EMAIL }}
           SWILLIAMS_PW=${{ secrets.SWILLIAMS_PW }}
           SPREADSHEET_ID=${{ secrets.SPREADSHEET_ID }}
-          GOOGLE_CREDENTIALS_JSON=/tmp/service_account.json
+          GOOGLE_CREDENTIALS_JSON=oauth_client_secret.json
           EOF
 
       # ── 7. Run the sync ─────────────────────────────────────────────────
       - name: Run SW sync
-        run: python PlaidSync/sw_sync.py
+        run: python "docs/Financial Workbook/PlaidSync/sw_sync.py"
 
       # ── 8. Upload debug screenshots if the run fails ─────────────────────
-      # Playwright saves debug_*.png files when it can't find a page element.
-      # These help diagnose SW portal layout changes without re-running locally.
       - name: Upload debug screenshots on failure
         if: failure()
         uses: actions/upload-artifact@v4
         with:
           name: sw-sync-debug-screenshots
-          path: PlaidSync/debug_*.png
+          path: "docs/Financial Workbook/PlaidSync/debug_*.png"
           if-no-files-found: ignore
           retention-days: 7
 
@@ -103,6 +101,6 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: sw-sync-log
-          path: PlaidSync/sw_sync.log
+          path: "docs/Financial Workbook/PlaidSync/sw_sync.log"
           if-no-files-found: ignore
           retention-days: 7
