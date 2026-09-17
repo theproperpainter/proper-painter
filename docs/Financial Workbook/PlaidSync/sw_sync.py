@@ -1027,7 +1027,7 @@ def _push_to_sheets(invoice_records: list[dict], payment_records: list[dict]):
         # ── Read existing sheet data (cols A–G) ───────────────────────────
         result = api.values().get(
             spreadsheetId=spreadsheet_id,
-            range=f"'{SHEET}'!A:G"
+            range=f"'{SHEET}'!A:F"
         ).execute()
         rows = result.get('values', [])
 
@@ -1069,7 +1069,6 @@ def _push_to_sheets(invoice_records: list[dict], payment_records: list[dict]):
                 float(rec['amount']) if rec.get('amount') else '',
                 dedup_id,
                 rec.get('order_num', ''),
-                'Invoice',
             ])
 
         new_payment_rows = []
@@ -1085,7 +1084,6 @@ def _push_to_sheets(invoice_records: list[dict], payment_records: list[dict]):
                 float(pay['amount']) if pay.get('amount') else '',
                 dedup_id,
                 pay.get('location', ''),
-                'Payment',
             ])
 
         # ── Find insert rows for each section ─────────────────────────────
@@ -1116,8 +1114,10 @@ def _push_to_sheets(invoice_records: list[dict], payment_records: list[dict]):
                     next_empty,
                 )
                 insert_at = next_empty
-            rng = f"'{SHEET}'!A{insert_at}:G{insert_at + len(new_invoice_rows) - 1}"
+            rng = f"'{SHEET}'!A{insert_at}:F{insert_at + len(new_invoice_rows) - 1}"
             updates.append({'range': rng, 'values': new_invoice_rows})
+            rng_type = f"'{SHEET}'!H{insert_at}:H{insert_at + len(new_invoice_rows) - 1}"
+            updates.append({'range': rng_type, 'values': [['Invoice']] * len(new_invoice_rows)})
             log.info(f"Queued {len(new_invoice_rows)} invoice row(s) → Sheet row {insert_at}")
             # Advance the "next empty" pointer for payments
             next_empty = insert_at + len(new_invoice_rows)
@@ -1133,8 +1133,10 @@ def _push_to_sheets(invoice_records: list[dict], payment_records: list[dict]):
                     next_empty,
                 )
                 insert_at = next_empty
-            rng = f"'{SHEET}'!A{insert_at}:G{insert_at + len(new_payment_rows) - 1}"
+            rng = f"'{SHEET}'!A{insert_at}:F{insert_at + len(new_payment_rows) - 1}"
             updates.append({'range': rng, 'values': new_payment_rows})
+            rng_type = f"'{SHEET}'!H{insert_at}:H{insert_at + len(new_payment_rows) - 1}"
+            updates.append({'range': rng_type, 'values': [['Payment']] * len(new_payment_rows)})
             log.info(f"Queued {len(new_payment_rows)} payment row(s) → Sheet row {insert_at}")
 
         # ── Execute batch update ──────────────────────────────────────────
