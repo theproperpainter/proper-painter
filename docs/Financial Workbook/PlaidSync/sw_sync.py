@@ -1147,6 +1147,81 @@ def _push_to_sheets(invoice_records: list[dict], payment_records: list[dict]):
                 f"Sheets push complete: "
                 f"{len(new_invoice_rows)} invoice(s), {len(new_payment_rows)} payment(s) added"
             )
+
+            # ── Expand filter range & sort by date descending ─────────────
+            try:
+                # Look up the numeric sheetId for 'SW Credit Account'
+                meta = api.get(
+                    spreadsheetId=spreadsheet_id,
+                    fields='sheets.properties'
+                ).execute()
+                sheet_id = None
+                for s in meta.get('sheets', []):
+                    if s['properties']['title'] == SHEET:
+                        sheet_id = s['properties']['sheetId']
+                        break
+
+                if sheet_id is None:
+                    log.warning(f"Could not find sheet '{SHEET}' — skipping filter/sort update")
+                else:
+                    # Find the first row that looks like a data row (date in col A)
+                    first_data_idx = None  # 0-indexed
+                    for i, row in enumerate(rows):
+                        col_a = str(row[0]).strip() if row else ''
+                        if col_a and col_a[0].isdigit():
+                            first_data_idx = i
+                            break
+
+                    struct_requests = [
+                        # Re-set the AutoFilter to cover all columns A–G
+                        # (no endRowIndex = extends to bottom of sheet,
+                        #  so new appended rows are always inside the filter)
+                        {
+                            'setBasicFilter': {
+                                'filter': {
+                                    'range': {
+                                        'sheetId':          sheet_id,
+                                        'startRowIndex':    0,
+                                        'startColumnIndex': 0,
+                                        'endColumnIndex':   7,   # A–G
+                                    }
+                                }
+                            }
+                        },
+                    ]
+
+                    # Sort data rows (skip header/title rows above first data row)
+                    if first_data_idx is not None:
+                        struct_requests.append({
+                            'sortRange': {
+                                'range': {
+                                    'sheetId':          sheet_id,
+                                    'startRowIndex':    first_data_idx,
+                                    'startColumnIndex': 0,
+                                    'endColumnIndex':   7,   # A–G
+                                    # no endRowIndex → sorts to last row of sheet;
+                                    # empty rows float to the bottom
+                                },
+                                'sortSpecs': [{
+                                    'dimensionIndex': 0,        # column A = Date
+                                    'sortOrder':      'DESCENDING'
+                                }]
+                            }
+                        })
+                        log.info(
+                            f"Sorting data from row {first_data_idx + 1} "
+                            f"by date descending"
+                        )
+
+                    api.batchUpdate(
+                        spreadsheetId=spreadsheet_id,
+                        body={'requests': struct_requests}
+                    ).execute()
+                    log.info("Filter range updated; data sorted newest → oldest")
+
+            except Exception as fe:
+                log.warning(f"Filter/sort update failed (non-fatal): {fe}", exc_info=True)
+
         elif not new_invoice_rows and not new_payment_rows:
             log.info("Sheets push: no new records (all already present or deduped)")
 
