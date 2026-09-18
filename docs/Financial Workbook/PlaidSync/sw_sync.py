@@ -1039,9 +1039,9 @@ def _push_to_sheets(invoice_records: list[dict], payment_records: list[dict]):
         for i, row in enumerate(rows):
             sheet_row = i + 1
             col_a = str(row[0]).strip().upper() if row else ''
-            col_e = str(row[4]).strip()         if len(row) > 4 else ''
-            if col_e:
-                existing_ids.add(col_e)
+            col_f = str(row[5]).strip()         if len(row) > 5 else ''
+            if col_f:
+                existing_ids.add(col_f)
             if ('PURCHASE' in col_a or 'CHARGE' in col_a) and purchases_hdr_row is None:
                 purchases_hdr_row = sheet_row
             if 'PAYMENT' in col_a and purchases_hdr_row and payments_hdr_row is None:
@@ -1062,13 +1062,14 @@ def _push_to_sheets(invoice_records: list[dict], payment_records: list[dict]):
             desc = f"INV#{rec['inv_num']}"
             if rec.get('po_num'):
                 desc += f" – {rec['po_num']}"
+            # Column layout: Date | Description | PO/Ref # | Amount | Type | Dedup ID
             new_invoice_rows.append([
                 rec['date'],
                 desc,
                 rec.get('po_num', ''),
                 float(rec['amount']) if rec.get('amount') else '',
+                'Invoice',
                 dedup_id,
-                rec.get('order_num', ''),
             ])
 
         new_payment_rows = []
@@ -1077,13 +1078,14 @@ def _push_to_sheets(invoice_records: list[dict], payment_records: list[dict]):
             dedup_id = f"SW-PAY-{ref}" if ref else ''
             if dedup_id and dedup_id in existing_ids:
                 continue
+            # Column layout: Date | Description | PO/Ref # | Amount | Type | Dedup ID
             new_payment_rows.append([
                 pay.get('date', ''),
                 pay.get('description', ''),
-                pay.get('job_num', ''),
+                ref,
                 float(pay['amount']) if pay.get('amount') else '',
+                'Payment',
                 dedup_id,
-                pay.get('location', ''),
             ])
 
         # ── Find insert rows for each section ─────────────────────────────
@@ -1116,8 +1118,6 @@ def _push_to_sheets(invoice_records: list[dict], payment_records: list[dict]):
                 insert_at = next_empty
             rng = f"'{SHEET}'!A{insert_at}:F{insert_at + len(new_invoice_rows) - 1}"
             updates.append({'range': rng, 'values': new_invoice_rows})
-            rng_type = f"'{SHEET}'!H{insert_at}:H{insert_at + len(new_invoice_rows) - 1}"
-            updates.append({'range': rng_type, 'values': [['Invoice']] * len(new_invoice_rows)})
             log.info(f"Queued {len(new_invoice_rows)} invoice row(s) → Sheet row {insert_at}")
             # Advance the "next empty" pointer for payments
             next_empty = insert_at + len(new_invoice_rows)
@@ -1135,8 +1135,6 @@ def _push_to_sheets(invoice_records: list[dict], payment_records: list[dict]):
                 insert_at = next_empty
             rng = f"'{SHEET}'!A{insert_at}:F{insert_at + len(new_payment_rows) - 1}"
             updates.append({'range': rng, 'values': new_payment_rows})
-            rng_type = f"'{SHEET}'!H{insert_at}:H{insert_at + len(new_payment_rows) - 1}"
-            updates.append({'range': rng_type, 'values': [['Payment']] * len(new_payment_rows)})
             log.info(f"Queued {len(new_payment_rows)} payment row(s) → Sheet row {insert_at}")
 
         # ── Execute batch update ──────────────────────────────────────────
