@@ -76,6 +76,10 @@ overlapping job. Setup:
 2. Run **🎨 Proper Painter → Install Auto Cal Slots** once (approve the permission prompt).
 3. Run **🎨 Proper Painter → Assign Cal Slots Now** to fill in the current jobs.
 
+**Completed jobs** (any Status containing "Complete", e.g. `Project Complete`) get
+no slot, so they drop off the calendar and their slot is free for other jobs. The
+row and all its data stay in Schedule Input.
+
 This **overwrites any slot numbers typed by hand** in column E. A job needs a
 Start Date to get a slot. If more than 5 jobs overlap, the extra one is left
 blank and a warning appears.
@@ -98,32 +102,46 @@ Create a new Zap named **DripJobs → Schedule Input**.
 - Spreadsheet: your Proper Painter workbook
 - Worksheet: **Schedule Input**
 - Lookup column: **DripJobs ID** (column I)
-- Lookup value: **Project Job Id** (from Step 1)
-- Tick **"Create Google Sheets row if it doesn't exist yet"**, and when it asks
-  for the new row's values, fill in:
+- Lookup value: **Project Job Id** (from Step 1; it appears as `Project › Job › ID`)
+- Leave the two **Supporting lookup** fields empty.
+- Tick **"Create Google Sheets row if it doesn't exist yet"**, and fill in the
+  new row's values. **Use the same DripJobs fields as Step 3 for the dates.**
 
   | Column | Value from DripJobs |
   |---|---|
   | Job / Customer | Project Job Name |
+  | Start Date | Project Job Start Date (the copy that shows a date in its preview) |
+  | End Date | Project Job End Date |
+  | Crew | Project Crew Name (empty unless you fill it in DripJobs) |
+  | Cal Slot | *(leave blank; the script fills it)* |
+  | Contract ($) | Project Amount (0 if the job has no total in DripJobs) |
+  | Balance Owed ($) | **leave blank.** Do *not* use `Customer › Credit Balance`. That is the customer's account credit, not what they owe on the job. |
+  | Status | **Project New Deal Stage** (not `Job › Status`, which says "Completed"/"Scheduled") |
   | DripJobs ID | Project Job Id |
-  | Status | Project New Deal Stage |
 
 ### Step 3 — Update the row
 - App: **Google Sheets**
 - Event: **Update Spreadsheet Row**
 - Spreadsheet / Worksheet: same as Step 2
-- Row: the row number **from Step 2**
+- Row: the row number **from Step 2** (shown as `2. Row: 76`)
 - Map only these columns:
 
   | Sheet column | DripJobs field | Notes |
   |---|---|---|
   | H — Status | **Project New Deal Stage** | Always updates |
-  | B — Start Date | **Project Job Start Date** | Pick the copy that shows a date in its preview |
-  | C — End Date | **Project Job End Date** | Was empty in the test sample |
+  | B — Start Date | **Project Job Start Date** | Same field as Step 2 |
+  | C — End Date | **Project Job End Date** | Same field as Step 2 |
 
-- **Leave A, D, E, F, G unmapped for now.** (E is filled by the script; see 1d. The rest: see "Later" below.)
+- **Leave A, D, E, F, G and the DripJobs ID unmapped.** (E is filled by the script; see 1d.)
+- Set **Overwrite All Columns** to **False**, so an empty value from DripJobs never wipes a value already in the sheet.
 
-### Turn it on, then test
+### Publish, then test
+- A Zap that says **"Your Zap is ready! Publish"** is still a draft and does not run on real
+  changes. Click **Publish**.
+- Check the Zaps list for **any other Zap** using the DripJobs trigger (an older
+  create-only test Zap will add a duplicate row on every stage change). Turn it off.
+- Clicking **Test** in the editor is a real run and can add a real row.
+
 1. In DripJobs, move one *real* job to a different stage.
 2. Wait a minute, then check Zap History in Zapier for a green run.
 3. Confirm in the sheet:
@@ -139,9 +157,12 @@ Create a new Zap named **DripJobs → Schedule Input**.
 - **Only future changes are captured.** Zapier fires when a stage changes; it
   cannot pull the existing pipeline. Jobs already in the sheet update the next
   time their stage moves (that's why Part 1b matters).
-- **Blank dates:** if DripJobs has no end date, the Zap may write a blank over one
-  you typed by hand. Watch for this during testing. If it happens, tell Claude
-  and we'll switch to a step that skips blank fields.
+- **Dates arrive with a time.** DripJobs/Zapier can send date+time. The Cal Slot
+  script strips the time from Start and End (columns B and C) and formats them
+  `m/d/yyyy` whenever it runs, so keep **Install Auto Cal Slots** turned on. Until it
+  runs, a fresh Zap row can briefly show the time.
+- **Blank dates:** with Overwrite All Columns set to False, an empty date from
+  DripJobs should not erase one already in the sheet. Confirm this on your first test.
 - **Contract ($):** `Project Amount` was 0 in the test sample. Re-test on a real
   job before mapping it to column F.
 - **Crew:** DripJobs has a `Project Crew Name` field, but it was empty in the
