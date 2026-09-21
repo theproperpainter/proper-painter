@@ -247,6 +247,18 @@ function _updateAccountBalances(ss, clientId, secret, accounts) {
     }
   }
 
+  // Safety: rows 3–4 are reserved for the balances. If anything else is in
+  // A3:A4 (e.g. a transaction moved up into them), do NOT overwrite it.
+  const existingLabels = sheet.getRange(3, 1, 2, 1).getValues().map(r => String(r[0] || '').trim());
+  const blocked = existingLabels.some(v => v !== '' && v.indexOf('Business Checking') !== 0);
+  if (blocked) {
+    const msg = `Balance update skipped: rows 3–4 of "${SHEET_TRANSACTIONS}" contain other data. ` +
+                'Keep those two rows free for the Plaid balances.';
+    Logger.log(msg);
+    ss.toast(msg, '🎨 Proper Painter', 10);
+    return;
+  }
+
   // Always write rows 3–4 (show N/A if a balance couldn't be fetched)
   const rows = TARGET_MASKS.map(mask => [
     `Business Checking ***${mask}`,
@@ -324,17 +336,24 @@ function autoAssignCalSlots() {
     if (lastRow < 2) return;
 
     const numRows = lastRow - 1;
-    const values  = sheet.getRange(2, 1, numRows, 5).getValues();   // A:E, from row 2
+    const values  = sheet.getRange(2, 1, numRows, 8).getValues();   // A:H, from row 2
 
     const toDay = v => {
       const d = v instanceof Date ? v : new Date(v);
       return isNaN(d.getTime()) ? null : new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
     };
 
-    // Build the list of jobs that have a usable start date
+    // Build the list of jobs that have a usable start date.
+    // Completed jobs get NO slot, which removes them from the calendar
+    // (the calendar only shows jobs that have a slot) and frees the slot for others.
     const jobs = [];
+    const completedIdx = [];
     values.forEach((row, i) => {
       const name  = String(row[0] || '').trim();
+      if (/complete/i.test(String(row[7] || ''))) {          // column H = Status
+        if (name) completedIdx.push(i);
+        return;
+      }
       const start = row[1] === '' ? null : toDay(row[1]);
       if (!name || start === null) return;
       const end = row[2] === '' ? start : (toDay(row[2]) ?? start);
@@ -365,6 +384,7 @@ function autoAssignCalSlots() {
     // Write column E only (one call), leaving rows we didn't touch as they were
     const slotCol = values.map(r => [r[4]]);
     jobs.forEach(job => { slotCol[job.idx][0] = job.slot || ''; });
+    completedIdx.forEach(i => { slotCol[i][0] = ''; });
     sheet.getRange(2, 5, numRows, 1).setValues(slotCol);
 
     if (overflow.length) {
