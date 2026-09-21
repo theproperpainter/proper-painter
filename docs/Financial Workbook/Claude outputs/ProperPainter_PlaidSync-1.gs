@@ -338,6 +338,18 @@ function autoAssignCalSlots() {
     const numRows = lastRow - 1;
     const values  = sheet.getRange(2, 1, numRows, 8).getValues();   // A:H, from row 2
 
+    // Strip time-of-day from Start (B) / End (C). Zapier/DripJobs can send date+time.
+    let datesChanged = false;
+    const cleanDates = values.map(r => [1, 2].map(ci => {
+      const orig = r[ci], clean = _dateOnly(orig);
+      if (clean instanceof Date && !(orig instanceof Date && orig.getTime() === clean.getTime())) datesChanged = true;
+      return clean;
+    }));
+    if (datesChanged) {
+      sheet.getRange(2, 2, numRows, 2).setValues(cleanDates).setNumberFormat('m/d/yyyy');
+      values.forEach((r, i) => { r[1] = cleanDates[i][0]; r[2] = cleanDates[i][1]; });
+    }
+
     const toDay = v => {
       const d = v instanceof Date ? v : new Date(v);
       return isNaN(d.getTime()) ? null : new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
@@ -395,6 +407,24 @@ function autoAssignCalSlots() {
   } finally {
     lock.releaseLock();
   }
+}
+
+
+/**
+ * Returns a date-only Date (midnight) for a Date, an ISO string like
+ * "2026-06-29T00:00:00Z" (uses the date part as written, no timezone shift),
+ * or "M/D/YYYY [time]". Anything else (blank, junk) is returned unchanged.
+ */
+function _dateOnly(v) {
+  if (v instanceof Date) {
+    return isNaN(v.getTime()) ? v : new Date(v.getFullYear(), v.getMonth(), v.getDate());
+  }
+  const s = String(v == null ? '' : v).trim();
+  let m = s.match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if (m) return new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3]));
+  m = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+  if (m) return new Date(Number(m[3]), Number(m[1]) - 1, Number(m[2]));
+  return v;
 }
 
 
