@@ -16,6 +16,7 @@ clock time it was logged. Edit the "Hours" column with your real numbers.
 | 2026-09-21 | 16:49 EDT | Cal Slot script: hide Complete jobs from calendar; cash-on-hand analysis of Transactions Log / Monthly View / Outstanding Balances (initial review, questions) | ___ |
 | 2026-09-21 | 17:38 EDT | Reviewed live workbook exports; found Plaid balance script overwriting Transactions Log rows 3–4; added overwrite safeguard to script; walked through layout/formula fixes and verified corrected cash-on-hand figures | ___ |
 | 2026-09-21 | Full day | **Total hours for 2026-09-21, as reported by user** (covers the 2026-09-21 entries above; those rows are left blank to avoid double-counting) | 8 |
+| 2026-09-21 | 18:51 EDT | Zap step review (screenshots) and mapping fixes; date/time stripping in Cal Slot script; updated setup guide; invoice data analysis (Deal Id vs project ID); wrote Copilot prompt; invoice Zap test | ___ (covered by the daily total above) |
 
 **Tracking start date:** 2026-09-20. Nothing before today is counted.
 **Reported by user:** 7:00 PM – 9:30 PM on-site = 2.5 hours. It is not yet confirmed whether the
