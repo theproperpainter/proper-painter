@@ -161,6 +161,7 @@ function onOpen() {
     .addSeparator()
     .addItem('Assign Cal Slots Now',          'autoAssignCalSlots')
     .addItem('Install Auto Cal Slots',        'installSlotTrigger')
+    .addItem('Import Jobs from CSV Tab (one-time)', 'importJobsFromCsvTab')
     .addSeparator()
     .addItem('Build Job Category Profitability Report', 'buildProfitabilityReport')
     .addSeparator()
@@ -318,11 +319,12 @@ function autoAssignCalSlots() {
     const sheet = ss.getSheetByName(SHEET_SCHEDULE_INPUT);
     if (!sheet) return;
 
+    // Headers are in row 1; jobs start in row 2
     const lastRow = sheet.getLastRow();
-    if (lastRow < 3) return;
+    if (lastRow < 2) return;
 
-    const numRows = lastRow - 2;
-    const values  = sheet.getRange(3, 1, numRows, 5).getValues();   // A:E, from row 3
+    const numRows = lastRow - 1;
+    const values  = sheet.getRange(2, 1, numRows, 5).getValues();   // A:E, from row 2
 
     const toDay = v => {
       const d = v instanceof Date ? v : new Date(v);
@@ -363,7 +365,7 @@ function autoAssignCalSlots() {
     // Write column E only (one call), leaving rows we didn't touch as they were
     const slotCol = values.map(r => [r[4]]);
     jobs.forEach(job => { slotCol[job.idx][0] = job.slot || ''; });
-    sheet.getRange(3, 5, numRows, 1).setValues(slotCol);
+    sheet.getRange(2, 5, numRows, 1).setValues(slotCol);
 
     if (overflow.length) {
       const msg = `More than ${MAX_CAL_SLOTS} jobs overlap — no slot for: ${overflow.join(', ')}`;
@@ -395,6 +397,212 @@ function installSlotTrigger() {
     '✓ Auto Cal Slots installed.\n\nSlots in Schedule Input column E will be ' +
     'assigned automatically whenever the sheet changes.'
   );
+}
+
+
+// ── One-time import of DripJobs "Jobs List" CSV ──────────────────────────────
+
+const SHEET_JOBS_IMPORT  = 'Jobs Import';
+const SHEET_IMPORT_REPORT = 'Import Report';
+const NEEDS_ID_TEXT      = 'NEEDS ID';
+
+/**
+ * One-time load of existing DripJobs projects into Schedule Input.
+ *
+ * BEFORE RUNNING: File → Import → upload the DripJobs Jobs_List CSV →
+ * "Insert new sheet(s)", then rename that new tab to  Jobs Import.
+ *
+ * Rules:
+ *  - Row is skipped if Schedule Input already has the same name + start date.
+ *  - Row is NOT imported (listed on the "Import Report" tab for you to review)
+ *    if the name exists in Schedule Input but the dates differ.
+ *  - Everything else is appended below the last job.
+ *  - Completed jobs are imported with DripJobs ID blank (the Zap won't touch them).
+ *  - Active jobs (not "Project Complete") get "NEEDS ID" in column I, highlighted
+ *    yellow. Paste the real ID (end of the Work Order link) over it.
+ *  - Contract ($) = CSV Amount, Balance Owed ($) = CSV Balance (one-time snapshot).
+ *  - Nothing in DripJobs is changed, and existing rows are never modified.
+ */
+function importJobsFromCsvTab() {
+  const ss     = SpreadsheetApp.getActiveSpreadsheet();
+  const ui     = SpreadsheetApp.getUi();
+  const src    = ss.getSheetByName(SHEET_JOBS_IMPORT);
+  const target = ss.getSheetByName(SHEET_SCHEDULE_INPUT);
+
+  if (!src)    { ui.alert(`Tab "${SHEET_JOBS_IMPORT}" not found. Import the CSV as a new sheet and rename it first.`); return; }
+  if (!target) { ui.alert(`Tab "${SHEET_SCHEDULE_INPUT}" not found.`); return; }
+
+  // Read the CSV tab into objects keyed by header name
+  const srcValues = src.getDataRange().getValues();
+  const headers   = srcValues[0].map(h => String(h).trim());
+  const need = ['Job', 'Deal Stage', 'Job Start Date', 'Job Completion Date', 'Job Scheduled Date', 'Crew', 'Amount', 'Balance'];
+  const missing = need.filter(h => headers.indexOf(h) === -1);
+  if (missing.length) { ui.alert('The import tab is missing column(s): ' + missing.join(', ')); return; }
+
+  const importRows = srcValues.slice(1)
+    .filter(r => String(r[headers.indexOf('Job')] || '').trim() !== '')
+    .map(r => { const o = {}; headers.forEach((h, i) => { o[h] = r[i]; }); return o; });
+
+  // Locate Schedule Input columns by header name (row 1)
+  const tHeaders = target.getRange(1, 1, 1, Math.max(target.getLastColumn(), 9)).getValues()[0].map(h => String(h).trim());
+  const col = name => tHeaders.indexOf(name);
+  const cName = col('Job / Customer'), cStart = col('Start Date'), cEnd = col('End Date'),
+        cCrew = col('Crew'), cContract = col('Contract ($)'), cBal = col('Balance Owed ($)'),
+        cStatus = col('Status'), cId = col('DripJobs ID');
+  if ([cName, cStart, cEnd, cCrew, cContract, cBal, cStatus, cId].some(c => c === -1)) {
+    ui.alert('Schedule Input headers not as expected in row 1 (need Job / Customer, Start Date, End Date, Crew, Contract ($), Balance Owed ($), Status, DripJobs ID).');
+    return;
+  }
+
+  // Existing jobs + the first empty row in column A
+  const lastRow = Math.max(target.getLastRow(), 1);
+  const existing = lastRow > 1 ? target.getRange(2, 1, lastRow - 1, tHeaders.length).getValues() : [];
+  let lastUsed = 1;
+  existing.forEach((r, i) => { if (String(r[cName] || '').trim() !== '') lastUsed = i + 2; });
+  const existingJobs = existing
+    .filter(r => String(r[cName] || '').trim() !== '')
+    .map(r => ({ name: r[cName], start: r[cStart], contract: r[cContract] }));
+
+  const plan = _planJobImport(importRows, existingJobs, new Date());
+
+  if (plan.toImport.length) {
+    const width = Math.max(tHeaders.length, 9);
+    const out = plan.toImport.map(j => {
+      const row = new Array(width).fill('');
+      row[cName] = j.name;   row[cStart] = j.start || '';  row[cEnd] = j.end || '';
+      row[cCrew] = j.crew;   row[cContract] = j.contract;  row[cBal] = j.balance;
+      row[cStatus] = j.status; row[cId] = j.needsId ? NEEDS_ID_TEXT : '';
+      return row;
+    });
+    const firstRow = lastUsed + 1;
+    const needRows = firstRow + out.length - 1 - target.getMaxRows();
+    if (needRows > 0) target.insertRowsAfter(target.getMaxRows(), needRows);
+
+    target.getRange(firstRow, 1, out.length, width).setValues(out);
+    target.getRange(firstRow, cStart + 1, out.length, 2).setNumberFormat('m/d/yyyy');
+    target.getRange(firstRow, cContract + 1, out.length, 1).setNumberFormat('$#,##0.00');
+    target.getRange(firstRow, cBal + 1, out.length, 1).setNumberFormat('$#,##0.00');
+    plan.toImport.forEach((j, i) => {
+      if (j.needsId) target.getRange(firstRow + i, cId + 1).setBackground('#ffff00');
+    });
+  }
+
+  // Report tab
+  let rep = ss.getSheetByName(SHEET_IMPORT_REPORT);
+  if (!rep) rep = ss.insertSheet(SHEET_IMPORT_REPORT); else rep.clear();
+  const repRows = [
+    ['Import run', new Date()],
+    ['Imported', plan.toImport.length],
+    ['  of which need a DripJobs ID (active jobs)', plan.toImport.filter(j => j.needsId).length],
+    ['Skipped (already in Schedule Input)', plan.skipped],
+    ['Not imported — name exists, dates differ (review)', plan.review.length],
+    [],
+    ['REVIEW: name already in Schedule Input, dates differ', 'CSV start', 'CSV stage', 'CSV contract'],
+  ].concat(plan.review.map(j => [j.name, j.start || '', j.status, j.contract]));
+  const w = Math.max.apply(null, repRows.map(r => r.length));
+  rep.getRange(1, 1, repRows.length, w).setValues(repRows.map(r => r.concat(new Array(w - r.length).fill(''))));
+  rep.setColumnWidth(1, 380);
+
+  autoAssignCalSlots();
+
+  ui.alert(
+    `Import finished.\n\nImported: ${plan.toImport.length}\n` +
+    `  needing a DripJobs ID (yellow "${NEEDS_ID_TEXT}"): ${plan.toImport.filter(j => j.needsId).length}\n` +
+    `Skipped (already there): ${plan.skipped}\n` +
+    `Held back for review: ${plan.review.length}\n\nDetails are on the "${SHEET_IMPORT_REPORT}" tab.`
+  );
+}
+
+
+/**
+ * Pure logic (no sheet access): decides which CSV rows to import.
+ * importRows: objects keyed by CSV header. existingJobs: [{name, start, contract}].
+ */
+function _planJobImport(importRows, existingJobs, today) {
+  const norm = s => String(s || '').trim().toLowerCase().replace(/\s+/g, ' ');
+  const day  = d => d ? new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime() : null;
+
+  const existing = {};   // name → [{start, contract}]
+  existingJobs.forEach(j => {
+    const d = _parseCsvDate(j.start, today);
+    (existing[norm(j.name)] = existing[norm(j.name)] || []).push({ start: day(d), contract: _parseMoney(j.contract) });
+  });
+
+  const plan = { toImport: [], skipped: 0, review: [] };
+
+  importRows.forEach(r => {
+    const name   = String(r['Job'] || '').trim();
+    const status = String(r['Deal Stage'] || '').trim();
+
+    let start = _parseCsvDate(r['Job Start Date'], today);
+    let end   = _parseCsvDate(r['Job Completion Date'], today);
+    if (!start) {
+      const range = _parseScheduledRange(r['Job Scheduled Date'], today);
+      if (range) { start = range.start; if (!end) end = range.end; }
+    }
+    if (start && !end) end = start;          // one-day placeholder so the calendar can show it
+    if (start && end && end < start) end = start;
+
+    const job = {
+      name: name,
+      start: start, end: end,
+      crew: String(r['Crew'] || '').trim(),
+      contract: _parseMoney(r['Amount']),
+      balance:  _parseMoney(r['Balance']),
+      status: status,
+      needsId: status !== 'Project Complete',
+    };
+
+    const matches = existing[norm(name)];
+    if (!matches) { plan.toImport.push(job); return; }
+
+    const sameStart = start && matches.some(m => m.start === day(start));
+    const sameBlank = !start && matches.some(m => m.start === null && m.contract === job.contract);
+    if (sameStart || sameBlank) plan.skipped++;
+    else plan.review.push(job);
+  });
+
+  return plan;
+}
+
+
+/** Accepts a Date, "MM/DD/YYYY", or junk like "N/A" → Date or null. */
+function _parseCsvDate(v, today) {
+  if (v instanceof Date) return isNaN(v.getTime()) ? null : v;
+  const s = String(v || '').trim();
+  const m = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+  if (!m) return null;
+  const d = new Date(Number(m[3]), Number(m[1]) - 1, Number(m[2]));
+  return isNaN(d.getTime()) ? null : d;
+}
+
+
+/** "Mon. Oct 5 - Wed. Oct 7" → {start, end}; year is inferred (no year in the export). */
+function _parseScheduledRange(v, today) {
+  const s = String(v || '');
+  const months = ['jan','feb','mar','apr','may','jun','jul','aug','sep','oct','nov','dec'];
+  const re = /(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\.?\s+(\d{1,2})/gi;
+  const found = [];
+  let m;
+  while ((m = re.exec(s)) !== null) found.push({ mon: months.indexOf(m[1].toLowerCase()), day: Number(m[2]) });
+  if (!found.length) return null;
+
+  const mk = (f, year) => new Date(year, f.mon, f.day);
+  let year = today.getFullYear();
+  let start = mk(found[0], year);
+  // Dates are upcoming: if it lands far in the past, it belongs to next year
+  if (today.getTime() - start.getTime() > 120 * 86400000) { year++; start = mk(found[0], year); }
+  let end = found.length > 1 ? mk(found[1], year) : start;
+  if (end < start) end = mk(found[1], year + 1);
+  return { start: start, end: end };
+}
+
+
+/** "$1,240.00" or 1240 → number (0 if blank/invalid). */
+function _parseMoney(v) {
+  if (typeof v === 'number') return v;
+  const n = parseFloat(String(v || '').replace(/[$,\s]/g, ''));
+  return isNaN(n) ? 0 : n;
 }
 
 

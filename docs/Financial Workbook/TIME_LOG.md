@@ -10,8 +10,9 @@ clock time it was logged. Edit the "Hours" column with your real numbers.
 | 2026-09-20 | 23:12 EDT | Zapier/Plaid/DripJobs research and Q&A; reviewed `Schedule Input` sheet and formula dependencies | ___ |
 | 2026-09-20 | 23:12 EDT | DripJobs → Schedule Input design: field mapping from Project Stage Changed sample, wrote `DRIPJOBS_ZAPIER_SETUP.md` | ___ |
 | 2026-09-20 | 23:12 EDT | Wrote auto Cal Slot assignment script (`autoAssignCalSlots`, menu items, trigger installer) | ___ |
-
 | 2026-09-20 | 19:00–21:30 EDT | Work at customer's site (as reported by user) | 2.5 |
+| 2026-09-21 | 11:15 EDT | Zapier troubleshooting (Lookup column / row 1 headers, row appended at bottom); updated Cal Slot script and setup guide for headers-in-row-1 layout | ___ |
+| 2026-09-21 | 12:56 EDT | Zap duplicate troubleshooting; analyzed DripJobs CSV export (no usable ID); wrote one-time CSV import script (`importJobsFromCsvTab`) and tested against real CSV; updated setup guide | ___ |
 
 **Tracking start date:** 2026-09-20. Nothing before today is counted.
 **Reported by user:** 7:00 PM – 9:30 PM on-site = 2.5 hours. It is not yet confirmed whether the

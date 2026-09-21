@@ -16,13 +16,38 @@ Pipeline stages (shown in the Status column exactly as DripJobs names them):
 
 ## Part 1 — Prepare the Google Sheet (one time)
 
-### 1a. Add the DripJobs ID column
+### 1a. Move the headers to row 1 and add the DripJobs ID column
+Zapier reads **row 1** as the column names, so the title row must go.
 1. Open the **Schedule Input** tab.
-2. In cell **I2**, type the header: `DripJobs ID`
-3. Match the formatting of the other headers (copy H2, paste onto I2).
+2. Right-click row 1 (the title) → **Delete row**. The headers are now row 1 and
+   jobs start in row 2. Google Sheets updates the calendar formulas automatically.
+3. In cell **I1**, type the header: `DripJobs ID`
+4. Match the formatting of the other headers (copy H1, paste onto I1).
 
 This column is how Zapier recognizes a job. Names can be typed differently in
 the sheet and in DripJobs, but the ID never changes.
+
+### 1b-import. One-time import of existing projects (from the DripJobs CSV)
+The DripJobs export has no project ID, so IDs can't be matched automatically.
+The import handles that as follows:
+- **Completed jobs** are imported with column I blank. They won't change stage again.
+- **Active jobs** (In Progress / Scheduled / Accepted) are imported with a yellow
+  **NEEDS ID** in column I. Paste the real ID over it (see 1b below) **before** the
+  next stage change on that job, or the Zap will add a duplicate row.
+- Jobs already in Schedule Input (same name + start date) are skipped. Same name with
+  different dates is **held back** and listed on the **Import Report** tab for you to review.
+- Contract ($) and Balance Owed ($) are filled from the CSV (a one-time snapshot).
+- Jobs with a start date but no completion date get End = Start so the calendar can show them.
+
+Steps:
+1. In DripJobs, export the Jobs list CSV.
+2. In the Google Sheet: **File → Import → Upload** the CSV → **Insert new sheet(s)**.
+   Rename the new tab to exactly `Jobs Import`.
+3. Paste the latest `.gs` into Apps Script and reload the sheet.
+4. Run **🎨 Proper Painter → Import Jobs from CSV Tab (one-time)**. Approve any prompts.
+5. Read the summary and the **Import Report** tab. Fix the yellow NEEDS ID cells.
+6. Delete the `Jobs Import` tab when done (don't run the import twice with an updated CSV
+   unless you want only new jobs added — re-running skips jobs already present).
 
 ### 1b. Fill in the ID for jobs already in the sheet  ⚠ do this before turning the Zap on
 If you skip this, the first stage change for each existing job will create a
@@ -34,10 +59,12 @@ For each existing job:
 2. The long code at the end is the Job ID. Paste it into column **I** on that job's row.
 
 ### 1c. Let the calendar see more rows
-The Schedule Calendar only reads rows 3–29 of Schedule Input. Extend it:
+After the row-1 change, the Schedule Calendar only reads rows 2–28 of Schedule
+Input, so new jobs added lower down (Zapier adds them at the bottom) would be
+ignored. Extend it:
 1. Open the **Schedule Calendar** tab.
 2. Press **Ctrl+H** (Find and replace).
-3. Find: `$29`  Replace with: `$500`
+3. Find: `$28`  Replace with: `$500`
 4. Search: **This sheet**. Tick **Also search within formulas**.
 5. Click **Replace all**. (About 150 formulas change.)
 
