@@ -159,6 +159,9 @@ function onOpen() {
     .createMenu('🎨 Proper Painter')
     .addItem('Update Account Balances Only', 'updateBalancesOnly')
     .addSeparator()
+    .addItem('Assign Cal Slots Now',          'autoAssignCalSlots')
+    .addItem('Install Auto Cal Slots',        'installSlotTrigger')
+    .addSeparator()
     .addItem('Build Job Category Profitability Report', 'buildProfitabilityReport')
     .addSeparator()
     .addItem('Setup / Re-configure Credentials', 'setupCredentials')
@@ -287,6 +290,111 @@ function _alertLoginRequired(accountName) {
   } catch (e) {
     Logger.log(`Could not send login-required alert: ${e.message}`);
   }
+}
+
+
+// ── Auto-assign Cal Slots ────────────────────────────────────────────────────
+
+const SHEET_SCHEDULE_INPUT = 'Schedule Input';
+const MAX_CAL_SLOTS        = 5;
+
+/**
+ * Fills the "Cal Slot (1–5)" column (E) of Schedule Input automatically.
+ *
+ * Jobs are processed alphabetically by customer name. Each job gets the lowest
+ * slot (1–5) not already used by an overlapping job that was placed before it.
+ * Jobs that don't overlap in time can share a slot. Rows with no start date are
+ * left alone. If more than 5 jobs overlap, the extra job's slot is left blank
+ * and a warning is shown.
+ *
+ * NOTE: this overwrites any slot numbers typed by hand in column E.
+ */
+function autoAssignCalSlots() {
+  const lock = LockService.getScriptLock();
+  if (!lock.tryLock(10000)) return;   // another run is in progress
+
+  try {
+    const ss    = SpreadsheetApp.getActiveSpreadsheet();
+    const sheet = ss.getSheetByName(SHEET_SCHEDULE_INPUT);
+    if (!sheet) return;
+
+    const lastRow = sheet.getLastRow();
+    if (lastRow < 3) return;
+
+    const numRows = lastRow - 2;
+    const values  = sheet.getRange(3, 1, numRows, 5).getValues();   // A:E, from row 3
+
+    const toDay = v => {
+      const d = v instanceof Date ? v : new Date(v);
+      return isNaN(d.getTime()) ? null : new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
+    };
+
+    // Build the list of jobs that have a usable start date
+    const jobs = [];
+    values.forEach((row, i) => {
+      const name  = String(row[0] || '').trim();
+      const start = row[1] === '' ? null : toDay(row[1]);
+      if (!name || start === null) return;
+      const end = row[2] === '' ? start : (toDay(row[2]) ?? start);
+      jobs.push({ idx: i, name: name, start: start, end: Math.max(start, end) });
+    });
+
+    // Alphabetical by customer, then earlier start, then sheet order
+    jobs.sort((a, b) =>
+      a.name.toLowerCase().localeCompare(b.name.toLowerCase()) ||
+      a.start - b.start ||
+      a.idx - b.idx
+    );
+
+    const placed   = [];
+    const overflow = [];
+    jobs.forEach(job => {
+      const used = new Set(
+        placed.filter(p => p.start <= job.end && p.end >= job.start).map(p => p.slot)
+      );
+      let slot = 0;
+      for (let s = 1; s <= MAX_CAL_SLOTS; s++) {
+        if (!used.has(s)) { slot = s; break; }
+      }
+      job.slot = slot;
+      if (slot) placed.push(job); else overflow.push(job.name);
+    });
+
+    // Write column E only (one call), leaving rows we didn't touch as they were
+    const slotCol = values.map(r => [r[4]]);
+    jobs.forEach(job => { slotCol[job.idx][0] = job.slot || ''; });
+    sheet.getRange(3, 5, numRows, 1).setValues(slotCol);
+
+    if (overflow.length) {
+      const msg = `More than ${MAX_CAL_SLOTS} jobs overlap — no slot for: ${overflow.join(', ')}`;
+      Logger.log(msg);
+      ss.toast(msg, '🎨 Proper Painter', 10);
+    }
+  } finally {
+    lock.releaseLock();
+  }
+}
+
+
+/**
+ * Runs autoAssignCalSlots automatically whenever the spreadsheet changes
+ * (including changes made by Zapier). Run once from the 🎨 menu.
+ * Changes made by the script itself do not re-trigger it.
+ */
+function installSlotTrigger() {
+  ScriptApp.getProjectTriggers().forEach(t => {
+    if (t.getHandlerFunction() === 'autoAssignCalSlots') ScriptApp.deleteTrigger(t);
+  });
+
+  ScriptApp.newTrigger('autoAssignCalSlots')
+    .forSpreadsheet(SpreadsheetApp.getActive())
+    .onChange()
+    .create();
+
+  SpreadsheetApp.getUi().alert(
+    '✓ Auto Cal Slots installed.\n\nSlots in Schedule Input column E will be ' +
+    'assigned automatically whenever the sheet changes.'
+  );
 }
 
 
