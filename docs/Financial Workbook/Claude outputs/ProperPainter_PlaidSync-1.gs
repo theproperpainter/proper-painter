@@ -162,6 +162,7 @@ function onOpen() {
     .addItem('Assign Cal Slots Now',          'autoAssignCalSlots')
     .addItem('Install Auto Cal Slots',        'installSlotTrigger')
     .addItem('Import Jobs from CSV Tab (one-time)', 'importJobsFromCsvTab')
+    .addItem('Flag Completed Jobs with a Balance', 'flagCompletedBalances')
     .addSeparator()
     .addItem('Build Job Category Profitability Report', 'buildProfitabilityReport')
     .addSeparator()
@@ -446,6 +447,77 @@ function installSlotTrigger() {
   SpreadsheetApp.getUi().alert(
     '✓ Auto Cal Slots installed.\n\nSlots in Schedule Input column E will be ' +
     'assigned automatically whenever the sheet changes.'
+  );
+}
+
+
+// ── Exclude-from-forecast flag ───────────────────────────────────────────────
+
+const EXCLUDE_DEFAULT_REASON = 'Completed before QuickBooks sync — balance already collected';
+
+/**
+ * Marks completed jobs that still show a balance as "Exclude from Forecast",
+ * so the future Cash Outlook can skip them without changing Status, Balance
+ * Owed, or anything DripJobs reports.
+ *
+ * Adds two columns to Schedule Input if missing: "Exclude from Forecast" and
+ * "Exclude Reason". Only fills cells that are currently BLANK — a manual
+ * TRUE/FALSE or a reason you typed is never overwritten, so this is safe to
+ * re-run after every import or sync.
+ */
+function flagCompletedBalances() {
+  const ui    = SpreadsheetApp.getUi();
+  const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(SHEET_SCHEDULE_INPUT);
+  if (!sheet) { ui.alert(`Tab "${SHEET_SCHEDULE_INPUT}" not found.`); return; }
+
+  let headers = sheet.getRange(1, 1, 1, Math.max(sheet.getLastColumn(), 8)).getValues()[0].map(h => String(h).trim());
+  const col = name => headers.indexOf(name);
+
+  let cExclude = col('Exclude from Forecast');
+  let cReason  = col('Exclude Reason');
+  const lastCol = Math.max(sheet.getLastColumn(), headers.length);
+  if (cExclude === -1) { cExclude = lastCol; sheet.getRange(1, cExclude + 1).setValue('Exclude from Forecast'); }
+  if (cReason === -1)  { cReason  = Math.max(cExclude, lastCol) + 1; sheet.getRange(1, cReason + 1).setValue('Exclude Reason'); }
+
+  headers = sheet.getRange(1, 1, 1, Math.max(sheet.getLastColumn(), cReason + 1)).getValues()[0].map(h => String(h).trim());
+  const cName = col('Job / Customer'), cBal = col('Balance Owed ($)'), cStatus = col('Status');
+  if ([cName, cBal, cStatus].some(c => c === -1)) {
+    ui.alert('Schedule Input headers not as expected (need Job / Customer, Balance Owed ($), Status).');
+    return;
+  }
+
+  const lastRow = sheet.getLastRow();
+  if (lastRow < 2) { ui.alert('No jobs found.'); return; }
+
+  const width = cReason + 1;
+  const values = sheet.getRange(2, 1, lastRow - 1, width).getValues();
+  let flagged = 0;
+
+  values.forEach(row => {
+    const name = String(row[cName] || '').trim();
+    if (!name) return;
+    const isComplete = /complete/i.test(String(row[cStatus] || ''));
+    const balance = parseFloat(row[cBal]);
+    const hasBalance = !isNaN(balance) && balance > 0.005;
+    // Careful: a manually-set FALSE must count as "not blank" so it's never
+    // overwritten. (row[cExclude] || '') would wrongly treat FALSE as blank.
+    const cell  = row[cExclude];
+    const blank = cell === '' || cell === null || cell === undefined;
+
+    if (isComplete && hasBalance && blank) {
+      row[cExclude] = true;
+      row[cReason]  = EXCLUDE_DEFAULT_REASON;
+      flagged++;
+    }
+  });
+
+  sheet.getRange(2, 1, values.length, width).setValues(values);
+
+  ui.alert(
+    `Exclude-from-forecast flag applied.\n\n` +
+    `Newly flagged: ${flagged}\n\n` +
+    `Existing TRUE/FALSE/reason values were left untouched. ` +
+    `To un-exclude a job you've since resolved, set its "Exclude from Forecast" cell to FALSE.`
   );
 }
 
