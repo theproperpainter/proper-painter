@@ -1,3 +1,5 @@
+import { readFileSync } from 'node:fs'
+import { basename } from 'node:path'
 import type { SanityClient } from '@sanity/client'
 
 export interface ImageFieldValue {
@@ -33,6 +35,21 @@ export async function uploadAsset(
   const filename = extractFilename(asset.url)
 
   const uploaded = await client.assets.upload('image', buffer, { filename })
+
+  return {
+    _type: 'image',
+    asset: { _type: 'reference', _ref: uploaded._id },
+  }
+}
+
+// Same as uploadAsset, but reads a file from local disk (e.g. a path under
+// Downloads) instead of fetching a URL.
+export async function uploadLocalAsset(
+  client: SanityClient,
+  asset: { path: string; alt: string }
+): Promise<ImageFieldValue> {
+  const buffer = readFileSync(asset.path)
+  const uploaded = await client.assets.upload('image', buffer, { filename: basename(asset.path) })
 
   return {
     _type: 'image',
