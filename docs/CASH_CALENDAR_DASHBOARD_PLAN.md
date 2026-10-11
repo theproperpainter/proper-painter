@@ -171,12 +171,38 @@ charge/payment FIFO reconciliation in app code, the sheet already computes it).
 `src/lib/dashboard/cash.ts` — if a Plaid balance is ever unreadable ("N/A"),
 this is surfaced as a visible warning, never silently treated as $0.
 
-**Still needed:** the calendar/jobs view, SW due-date (Net 30/FIFO) logic for
-the *future* bills-due panel (today's total is already live; per-invoice due
-dates for the calendar are separate, deferred), the Recurring Bills list and
-UI, Payroll integration, and future/past month navigation. The data layer
-(Sheets read access) and the access gate (auth) are both done and proven in
-production.
+**Calendar/jobs view: built and verified (2026-10-11).**
+`src/lib/dashboard/jobs.ts` reads `Schedule Input`, applies the same
+"Complete jobs are hidden" rule as `autoAssignCalSlots` in the Apps Script, so
+the calendar and the spreadsheet never disagree about which jobs are active.
+`src/lib/dashboard/calendar-utils.ts` (unit-tested directly — month grid
+padding, year wraparound, day-range matching all confirmed) +
+`src/components/dashboard/month-calendar.tsx` render a Sunday-start month grid
+with prev/next navigation via `?year=&month=` search params (plain links, no
+client JS needed).
+
+**Deliberate simplification vs. the old Sheets calendar:** each day cell lists
+the jobs active that day as small chips — there is **no Cal-Slot-style
+row/lane assignment or spanning-bar rendering**. That slot-assignment logic was
+the single biggest source of bugs in the Sheets version (duplicate rows,
+overlapping slots, the whole `autoAssignCalSlots` script existing to fix
+exactly this). A day-by-day chip list shows the same information with far
+less code and no possible slot-collision bug class. Revisit only if this
+genuinely feels worse in practice than the old spanning-bar view.
+
+Verified end-to-end with Playwright against the live site: current month
+(October 2026) correctly shows 7 real jobs on their actual dates (e.g. "Ellen
+Dillinger" Oct 4–6, "Kate Tomlinson" Oct 9), today (Oct 11) highlighted,
+Prev/Next navigation moves through Sep → Oct → Nov correctly, and a screenshot
+was reviewed to confirm the visual layout holds up.
+
+**Still needed:** SW due-date (Net 30/FIFO) logic for a *future* bills-due
+panel (today's total SW balance is already live; per-invoice due dates for
+calendar placement are separate, deferred), the Recurring Bills list and UI,
+Payroll integration into the calendar, and the deposit-received badge on job
+chips (Invoices tab lookup by DripJobs ID). The data layer, the access gate,
+the Available Cash headline, and the calendar/jobs view are all done and
+proven in production.
 
 ## Time log note
 

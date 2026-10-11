@@ -1,6 +1,8 @@
 import type { Metadata } from 'next'
 import { hasValidSession } from '@/lib/dashboard/session'
 import { getAvailableCash } from '@/lib/dashboard/cash'
+import { getActiveJobs } from '@/lib/dashboard/jobs'
+import MonthCalendar from '@/components/dashboard/month-calendar'
 import { redirect } from 'next/navigation'
 import { logout } from './actions'
 
@@ -14,12 +16,24 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 }
 
-export default async function DashboardPage() {
+export default async function DashboardPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ year?: string; month?: string }>
+}) {
   if (!(await hasValidSession())) {
     redirect('/dashboard/login')
   }
 
-  const cash = await getAvailableCash()
+  const today = new Date()
+  const params = await searchParams
+  // URL months are 1-indexed (human-friendly, ?month=10 for October) — convert
+  // to the 0-indexed convention calendar-utils and Date itself use internally.
+  const year = Number(params.year) || today.getFullYear()
+  const monthParam = Number(params.month)
+  const month = monthParam >= 1 && monthParam <= 12 ? monthParam - 1 : today.getMonth()
+
+  const [cash, jobs] = await Promise.all([getAvailableCash(), getActiveJobs()])
 
   return (
     <div className="mx-auto max-w-5xl px-6 py-16">
@@ -54,8 +68,10 @@ export default async function DashboardPage() {
 
       <p className="mt-8 text-sm text-gray-500">
         This is the raw bank balance, not reduced by what&rsquo;s owed above — payroll and the
-        recurring bills list aren&rsquo;t wired in yet. The calendar view goes here next.
+        recurring bills list aren&rsquo;t wired in yet.
       </p>
+
+      <MonthCalendar year={year} month={month} jobs={jobs} today={today} />
     </div>
   )
 }
