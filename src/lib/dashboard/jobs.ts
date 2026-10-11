@@ -7,6 +7,20 @@ export interface ScheduledJob {
   end: Date
   status: string
   crew: string
+  /** Schedule Input column I. Undefined/placeholder if not yet linked to a real DripJobs project. */
+  dripJobsId?: string
+}
+
+/** True if this looks like a real DripJobs ID, not blank or the NEEDS ID placeholder left by importJobsFromCsvTab. */
+export function hasRealDripJobsId(id: string | undefined): id is string {
+  return !!id && id.trim() !== '' && id.trim().toUpperCase() !== 'NEEDS ID'
+}
+
+/** The DripJobs page for a job's Work Order — the one URL pattern confirmed from real
+ *  DripJobs trigger data (Project Work Order Url), also what's used throughout this
+ *  project's setup docs for finding a job's ID by hand. */
+export function dripJobsUrl(id: string): string {
+  return `https://app.dripjobs.com/crew/workorders/details/${id}`
 }
 
 /** "6/29/2026" (the sheet's own m/d/yyyy format, as returned by the Sheets API's
@@ -30,7 +44,7 @@ function isComplete(status: string): boolean {
  * are still active.
  */
 export async function getActiveJobs(): Promise<ScheduledJob[]> {
-  const rows = await readRange("'Schedule Input'!A2:H500")
+  const rows = await readRange("'Schedule Input'!A2:I500")
   const jobs: ScheduledJob[] = []
 
   for (const row of rows) {
@@ -50,6 +64,7 @@ export async function getActiveJobs(): Promise<ScheduledJob[]> {
       end: end < start ? start : end,
       status,
       crew: String(row[3] ?? '').trim(),
+      dripJobsId: String(row[8] ?? '').trim() || undefined,
     })
   }
 

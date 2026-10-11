@@ -196,13 +196,34 @@ Dillinger" Oct 4–6, "Kate Tomlinson" Oct 9), today (Oct 11) highlighted,
 Prev/Next navigation moves through Sep → Oct → Nov correctly, and a screenshot
 was reviewed to confirm the visual layout holds up.
 
+**Contrast fix + clickable jobs (2026-10-12).** User reported the calendar was
+"black on black, almost couldn't see it." Root cause: job chips used
+`bg-gray-900` (`#171717`) against the page's pure-black background
+(`#000000`) — barely different in brightness. Fixed by switching chips to a
+light pill (`bg-gray-100` / `text-gray-900`, i.e. inverted — matches the
+site's existing button-hover convention of using foreground as the
+"emphasis" color). Today's cell also got a subtle background tint for
+orientation.
+
+Jobs are now clickable: `src/lib/dashboard/jobs.ts` reads Schedule Input
+column I (DripJobs ID) and links to
+`https://app.dripjobs.com/crew/workorders/details/<id>` (opens in a new tab)
+— **this is the one DripJobs URL pattern confirmed from real captured trigger
+data (`Project Work Order Url`), not a guess, but it goes to the crew Work
+Order view specifically. Flagged to the user as the best available option;
+revisit if they want a different DripJobs landing page.** A job with no real
+ID (blank, or the `NEEDS ID` placeholder from `importJobsFromCsvTab`) renders
+as plain, non-clickable text instead of a broken link. Verified against the
+live site: all 7 currently-scheduled jobs have real IDs and open correctly in
+a new tab.
+
 **Still needed:** SW due-date (Net 30/FIFO) logic for a *future* bills-due
 panel (today's total SW balance is already live; per-invoice due dates for
 calendar placement are separate, deferred), the Recurring Bills list and UI,
-Payroll integration into the calendar, and the deposit-received badge on job
-chips (Invoices tab lookup by DripJobs ID). The data layer, the access gate,
-the Available Cash headline, and the calendar/jobs view are all done and
-proven in production.
+Payroll integration into the calendar, and a deposit-received badge on job
+chips (Invoices tab lookup by DripJobs ID — separate from the link just
+added). The data layer, the access gate, the Available Cash headline, and
+the calendar/jobs view are all done and proven in production.
 
 ## Time log note
 

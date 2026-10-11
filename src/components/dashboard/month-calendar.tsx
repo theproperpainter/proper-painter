@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { buildMonthGrid, monthLabel, shiftMonth, jobsOnDay } from '@/lib/dashboard/calendar-utils'
-import type { ScheduledJob } from '@/lib/dashboard/jobs'
+import { hasRealDripJobsId, dripJobsUrl, type ScheduledJob } from '@/lib/dashboard/jobs'
 
 const DAY_LABELS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 
@@ -53,21 +53,39 @@ export default function MonthCalendar({
             return (
               <div
                 key={`${wi}-${di}`}
-                className={`min-h-24 bg-background p-1.5 ${inMonth ? '' : 'opacity-40'}`}
+                className={`min-h-24 p-1.5 ${isToday ? 'bg-gray-900' : 'bg-background'} ${inMonth ? '' : 'opacity-40'}`}
               >
                 <div className={`text-right ${isToday ? 'font-medium text-foreground' : 'text-gray-500'}`}>
                   {date.getDate()}
                 </div>
                 <div className="mt-1 space-y-0.5">
-                  {dayJobs.map((job) => (
-                    <div
-                      key={job.name + job.start.toISOString()}
-                      title={job.crew ? `${job.name} — ${job.crew}` : job.name}
-                      className="truncate border border-gray-700 bg-gray-900 px-1 py-0.5 text-[11px] leading-tight"
-                    >
-                      {job.name}
-                    </div>
-                  ))}
+                  {dayJobs.map((job) => {
+                    const chipClass =
+                      'block truncate rounded-sm bg-gray-100 px-1 py-0.5 text-[11px] leading-tight text-gray-900'
+                    const label = job.crew ? `${job.name} — ${job.crew}` : job.name
+                    const key = job.name + job.start.toISOString()
+
+                    if (hasRealDripJobsId(job.dripJobsId)) {
+                      return (
+                        <a
+                          key={key}
+                          href={dripJobsUrl(job.dripJobsId)}
+                          target="_blank"
+                          rel="noreferrer"
+                          title={`${label} — open in DripJobs`}
+                          className={`${chipClass} hover:bg-white`}
+                        >
+                          {job.name}
+                        </a>
+                      )
+                    }
+
+                    return (
+                      <div key={key} title={`${label} (not linked to a DripJobs ID)`} className={chipClass}>
+                        {job.name}
+                      </div>
+                    )
+                  })}
                 </div>
               </div>
             )
