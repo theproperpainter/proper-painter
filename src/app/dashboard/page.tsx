@@ -1,7 +1,11 @@
 import type { Metadata } from 'next'
 import { hasValidSession } from '@/lib/dashboard/session'
+import { getAvailableCash } from '@/lib/dashboard/cash'
 import { redirect } from 'next/navigation'
 import { logout } from './actions'
+
+const money = (n: number) =>
+  n.toLocaleString('en-US', { style: 'currency', currency: 'USD' })
 
 // Belt-and-suspenders: src/proxy.ts already gates every /dashboard/* request,
 // but checking again here follows the Next.js auth guide's recommendation to put
@@ -15,6 +19,8 @@ export default async function DashboardPage() {
     redirect('/dashboard/login')
   }
 
+  const cash = await getAvailableCash()
+
   return (
     <div className="mx-auto max-w-5xl px-6 py-16">
       <div className="flex items-baseline justify-between">
@@ -25,8 +31,30 @@ export default async function DashboardPage() {
           </button>
         </form>
       </div>
-      <p className="mt-6 text-gray-400">
-        Login and access are working. The cash and calendar views go here next.
+
+      <div className="mt-12 border-b border-gray-800 pb-10">
+        <p className="text-sm text-gray-500">Available Cash</p>
+        <p className="mt-2 text-5xl font-light tracking-tight">{money(cash.availableCash)}</p>
+        <p className="mt-2 text-xs text-gray-500">
+          {cash.asOfDate ? `FNB balance as of ${cash.asOfDate}` : 'FNB balance (date unknown)'}
+        </p>
+
+        {cash.missingAccounts.length > 0 && (
+          <p className="mt-4 text-sm text-gray-300" role="alert">
+            ⚠ Could not read {cash.missingAccounts.join(', ')} — this total is missing that
+            account and is understated.
+          </p>
+        )}
+
+        <div className="mt-6 flex items-baseline justify-between border-t border-gray-800 pt-4 text-sm">
+          <span className="text-gray-500">Owed to Sherwin-Williams</span>
+          <span>{money(cash.swBalanceOwed)}</span>
+        </div>
+      </div>
+
+      <p className="mt-8 text-sm text-gray-500">
+        This is the raw bank balance, not reduced by what&rsquo;s owed above — payroll and the
+        recurring bills list aren&rsquo;t wired in yet. The calendar view goes here next.
       </p>
     </div>
   )

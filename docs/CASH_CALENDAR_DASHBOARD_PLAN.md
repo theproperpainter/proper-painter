@@ -160,9 +160,23 @@ broken (couldn't resolve). Added env vars via the Vercel **dashboard**, not the
 CLI, to avoid writing to the wrong project. If CLI access to this project is
 needed later, it needs a fresh `vercel link` done carefully, confirming scope.
 
-**Still needed:** the actual calendar/cash-outlook UI and calculations
-(everything above this section) — not started. The data layer (Sheets read
-access) and the access gate (auth) are both done and proven in production.
+**Available Cash headline: built and verified (2026-10-12).** Design decision:
+shows the **raw live FNB balance**, not pre-reduced by known commitments — SW's
+current balance owed is shown as a supporting line right below it instead, so
+the headline number always exactly matches the bank and never bakes in a
+lookahead-window judgment call. Confirmed correct against live data:
+$3,349.38 + $4,525.26 = $7,874.64, SW balance $4,636.14 (read directly from the
+sheet's own live "Balance Owed" cell — no need to reimplement the
+charge/payment FIFO reconciliation in app code, the sheet already computes it).
+`src/lib/dashboard/cash.ts` — if a Plaid balance is ever unreadable ("N/A"),
+this is surfaced as a visible warning, never silently treated as $0.
+
+**Still needed:** the calendar/jobs view, SW due-date (Net 30/FIFO) logic for
+the *future* bills-due panel (today's total is already live; per-invoice due
+dates for the calendar are separate, deferred), the Recurring Bills list and
+UI, Payroll integration, and future/past month navigation. The data layer
+(Sheets read access) and the access gate (auth) are both done and proven in
+production.
 
 ## Time log note
 
