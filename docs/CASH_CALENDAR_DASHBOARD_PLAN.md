@@ -217,13 +217,43 @@ as plain, non-clickable text instead of a broken link. Verified against the
 live site: all 7 currently-scheduled jobs have real IDs and open correctly in
 a new tab.
 
-**Still needed:** SW due-date (Net 30/FIFO) logic for a *future* bills-due
-panel (today's total SW balance is already live; per-invoice due dates for
-calendar placement are separate, deferred), the Recurring Bills list and UI,
-Payroll integration into the calendar, and a deposit-received badge on job
-chips (Invoices tab lookup by DripJobs ID — separate from the link just
-added). The data layer, the access gate, the Available Cash headline, and
-the calendar/jobs view are all done and proven in production.
+**Calendar made its own themeable card; DripJobs links reverted (2026-10-12).**
+User reported the grid itself (not just job chips) was still "black on black,"
+and asked for user-choosable background/text colors, overlaid on the page
+without changing the site's global theme.
+`src/components/dashboard/calendar-theme-wrapper.tsx` (new, Client Component)
+wraps the calendar in its own card: two `<input type="color">` pickers (bg +
+text only — everything else, grid lines/muted labels/today-tint, is
+*derived* from those two via alpha-blended CSS custom properties, not five
+separate pickers), saved per-browser in `localStorage` (not shared/server-side
+— each person who logs in picks their own). `MonthCalendar`'s own chrome
+(nav, weekday labels, day numbers, grid lines) now reads `var(--cal-*)`
+instead of hardcoded Tailwind colors; job chips deliberately keep their own
+**fixed** colors + a border, not themed — verified this matters: the default
+card background (`#f5f5f5`) is the exact same color as the chip background,
+so without a border chips would disappear into a light-themed card. Verified
+end-to-end: colors apply live, persist across a reload, reset works, and chips
+stay visible even when the card bg is set to exactly match them.
+
+**DripJobs links reverted to plain text (2026-10-12) — the Work Order URL
+was wrong.** User hit "This link is no longer available" clicking a real job.
+DripJobs deactivates Work Order links at some point in a job's lifecycle —
+confirms the concern flagged when this was built: that URL is a crew-facing
+document, not a stable "view this project" page. **Still need: a confirmed
+working DripJobs URL for viewing a job/project**, ideally from the user
+opening one directly in the DripJobs web app (not a work order or invoice
+link) and sending the real URL, so this isn't guessed at a third time.
+`hasRealDripJobsId`/`dripJobsUrl` remain exported from `jobs.ts` for reuse
+once a correct pattern is confirmed; `month-calendar.tsx` no longer imports
+or uses them.
+
+**Still needed:** the correct DripJobs link destination (see above), SW
+due-date (Net 30/FIFO) logic for a *future* bills-due panel (today's total SW
+balance is already live; per-invoice due dates for calendar placement are
+separate, deferred), the Recurring Bills list and UI, Payroll integration
+into the calendar, and a deposit-received badge on job chips. The data layer,
+the access gate, the Available Cash headline, and the calendar/jobs view are
+all done and proven in production.
 
 ## Time log note
 

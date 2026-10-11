@@ -3,6 +3,7 @@ import { hasValidSession } from '@/lib/dashboard/session'
 import { getAvailableCash } from '@/lib/dashboard/cash'
 import { getActiveJobs } from '@/lib/dashboard/jobs'
 import MonthCalendar from '@/components/dashboard/month-calendar'
+import CalendarThemeWrapper from '@/components/dashboard/calendar-theme-wrapper'
 import { redirect } from 'next/navigation'
 import { logout } from './actions'
 
@@ -71,7 +72,11 @@ export default async function DashboardPage({
         recurring bills list aren&rsquo;t wired in yet.
       </p>
 
-      <MonthCalendar year={year} month={month} jobs={jobs} today={today} />
+      <div className="mt-12">
+        <CalendarThemeWrapper>
+          <MonthCalendar year={year} month={month} jobs={jobs} today={today} />
+        </CalendarThemeWrapper>
+      </div>
     </div>
   )
 }
