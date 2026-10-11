@@ -142,13 +142,27 @@ site chrome rather than feeling like a separate internal app. A clean fix exists
 (Next.js route groups with a second root layout) but means restructuring most of
 `app/` — out of scope unless it actually bothers the user in practice.
 
-**Still needed:**
-- **Set a real `DASHBOARD_PASSWORD`** in `.env.local` — currently a placeholder
-  (`CHANGE_ME_BEFORE_USE`), which the Playwright test above used to verify the flow
-  works, not a password meant to ship.
-- The actual calendar/cash-outlook UI and calculations (everything above this
-  section) — not started.
-- Nothing from this build session is committed yet.
+**Live in production (2026-10-12).** Real password set (`amber-velvet-cedar-59` —
+shared with Elizabeth, not a secret worth rotating urgently but change it if it
+leaks). All 6 env vars added to Vercel (Production + Preview). Pushed to
+`origin/master`, deployed, and verified with a real Playwright login against
+`https://www.theproperpainter.com/dashboard` — works.
+
+One hiccup along the way worth remembering: right after the deploy went "Ready,"
+the live domain 404'd on `/dashboard` for a few minutes — just Vercel edge
+propagation lag, not a real failure. Don't assume broken on a 404 immediately
+after a fresh deploy; recheck after a short wait before diagnosing further.
+
+Also found and worked around: this Vercel account/org has **multiple projects
+sharing similar names** — `vercel project inspect <name>` matched an unrelated
+project by name collision. The local `.vercel/project.json` link was also stale/
+broken (couldn't resolve). Added env vars via the Vercel **dashboard**, not the
+CLI, to avoid writing to the wrong project. If CLI access to this project is
+needed later, it needs a fresh `vercel link` done carefully, confirming scope.
+
+**Still needed:** the actual calendar/cash-outlook UI and calculations
+(everything above this section) — not started. The data layer (Sheets read
+access) and the access gate (auth) are both done and proven in production.
 
 ## Time log note
 
