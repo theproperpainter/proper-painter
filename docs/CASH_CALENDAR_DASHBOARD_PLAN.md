@@ -247,13 +247,24 @@ link) and sending the real URL, so this isn't guessed at a third time.
 once a correct pattern is confirmed; `month-calendar.tsx` no longer imports
 or uses them.
 
-**Still needed:** the correct DripJobs link destination (see above), SW
-due-date (Net 30/FIFO) logic for a *future* bills-due panel (today's total SW
-balance is already live; per-invoice due dates for calendar placement are
-separate, deferred), the Recurring Bills list and UI, Payroll integration
-into the calendar, and a deposit-received badge on job chips. The data layer,
-the access gate, the Available Cash headline, and the calendar/jobs view are
-all done and proven in production.
+**DripJobs link fixed — correct URL confirmed (2026-10-12).** User sent the
+real URL from clicking a proposal in DripJobs:
+`https://app.dripjobs.com/deals/_view/<id>`. The ID **matched what we already
+store** (same value as the dead Work Order link), so no new Zap/column work
+was needed — just changed `dripJobsUrl()` in `jobs.ts` and relinked the job
+chips. Verified against the live dev server: all 7 current jobs produce
+exactly this URL pattern with the right ID. Not independently verified that
+this link stays permanently valid the way the Work Order one didn't — it's a
+"_view" detail page rather than a crew document, which is a good sign, but
+only one real job has been click-tested so far.
+
+**Still needed:** SW due-date (Net 30/FIFO) logic for a *future* bills-due
+panel (today's total SW balance is already live; per-invoice due dates for
+calendar placement are separate, deferred), the Recurring Bills list and UI,
+Payroll integration into the calendar, and a deposit-received badge on job
+chips. The data layer, the access gate, the Available Cash headline, the
+calendar/jobs view, and now working DripJobs links are all done and proven
+in production.
 
 ## Time log note
 

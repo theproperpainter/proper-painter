@@ -16,11 +16,14 @@ export function hasRealDripJobsId(id: string | undefined): id is string {
   return !!id && id.trim() !== '' && id.trim().toUpperCase() !== 'NEEDS ID'
 }
 
-/** The DripJobs page for a job's Work Order — the one URL pattern confirmed from real
- *  DripJobs trigger data (Project Work Order Url), also what's used throughout this
- *  project's setup docs for finding a job's ID by hand. */
+/** The DripJobs "deal" view for a job — confirmed by the user (clicked the proposal
+ *  for a real job and sent the URL); the ID matches what we already store, so this
+ *  needed no new Zap mapping. Unlike the Work Order link this replaced, this is a
+ *  "_view" detail page, not a crew-facing document, so it should be a stable link
+ *  rather than one DripJobs deactivates over time — not independently verified
+ *  beyond the one job the user tested, worth confirming over time it stays good. */
 export function dripJobsUrl(id: string): string {
-  return `https://app.dripjobs.com/crew/workorders/details/${id}`
+  return `https://app.dripjobs.com/deals/_view/${id}`
 }
 
 /** "6/29/2026" (the sheet's own m/d/yyyy format, as returned by the Sheets API's

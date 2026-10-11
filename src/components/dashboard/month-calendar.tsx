@@ -1,14 +1,6 @@
 import Link from 'next/link'
 import { buildMonthGrid, monthLabel, shiftMonth, jobsOnDay } from '@/lib/dashboard/calendar-utils'
-import type { ScheduledJob } from '@/lib/dashboard/jobs'
-
-// Jobs are NOT clickable right now. They were linked to DripJobs' "Work Order"
-// view (app.dripjobs.com/crew/workorders/details/<id>), but that turned out to
-// be an unstable destination -- DripJobs deactivates those links at some point
-// in a job's lifecycle ("This link is no longer available", confirmed on a real
-// job). A dead link is worse than no link, so this reverts to plain text until
-// we have a confirmed, stable "view this project" URL from DripJobs — see
-// docs/CASH_CALENDAR_DASHBOARD_PLAN.md.
+import { hasRealDripJobsId, dripJobsUrl, type ScheduledJob } from '@/lib/dashboard/jobs'
 
 const DAY_LABELS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 
@@ -85,8 +77,23 @@ export default function MonthCalendar({
                     const label = job.crew ? `${job.name} — ${job.crew}` : job.name
                     const key = job.name + job.start.toISOString()
 
+                    if (hasRealDripJobsId(job.dripJobsId)) {
+                      return (
+                        <a
+                          key={key}
+                          href={dripJobsUrl(job.dripJobsId)}
+                          target="_blank"
+                          rel="noreferrer"
+                          title={`${label} — open in DripJobs`}
+                          className={`${chipClass} hover:bg-white`}
+                        >
+                          {job.name}
+                        </a>
+                      )
+                    }
+
                     return (
-                      <div key={key} title={label} className={chipClass}>
+                      <div key={key} title={`${label} (not linked to a DripJobs ID)`} className={chipClass}>
                         {job.name}
                       </div>
                     )
